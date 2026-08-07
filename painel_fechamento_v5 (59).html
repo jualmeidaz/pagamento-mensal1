@@ -1528,6 +1528,39 @@ function salvarLiberacao(id, val){
 
 
 
+
+// ── EDITAR PAGAMENTO (GESTÃO) ──
+function abrirModalEditarPagamento(id){
+  var p=pagamentos.find(function(x){return String(x.id)===String(id);});if(!p)return;
+  document.getElementById('ep-id').value=id;
+  document.getElementById('ep-ticket').value=p.ticket||'';
+  document.getElementById('ep-nome').value=p.nome||'';
+  var partes=(p.grupocota||'').split('/');
+  document.getElementById('ep-grupo').value=partes[0]||'';
+  document.getElementById('ep-cota').value=partes.slice(1).join('/')||'';
+  document.getElementById('ep-tipo').value=p.tipo||'';
+  document.getElementById('ep-contrato').value=p.contrato||'';
+  document.getElementById('ep-programado').value=p.programado||'';
+  document.getElementById('ep-etapa').value=p.etapa||'';
+  document.getElementById('overlay-edit-pag').classList.add('ativo');
+}
+function fecharModalEditarPagamento(){document.getElementById('overlay-edit-pag').classList.remove('ativo');}
+function salvarEdicaoPagamento(){
+  var id=document.getElementById('ep-id').value;
+  var p=pagamentos.find(function(x){return String(x.id)===String(id);});if(!p)return;
+  var gr=document.getElementById('ep-grupo').value.trim();
+  var co=document.getElementById('ep-cota').value.trim();
+  p.ticket=document.getElementById('ep-ticket').value.trim();
+  p.nome=document.getElementById('ep-nome').value.trim();
+  p.grupocota=gr&&co?gr+'/'+co:(gr||co);
+  p.tipo=document.getElementById('ep-tipo').value;
+  p.contrato=document.getElementById('ep-contrato').value;
+  p.programado=document.getElementById('ep-programado').value;
+  p.etapa=document.getElementById('ep-etapa').value;
+  salvarPagamentos();renderTabelaPagamentos();renderCardsPagamento();
+  fecharModalEditarPagamento();
+}
+
 // ── FATURAMENTO PAGAMENTO ──
 function faturarPagamento(id){
   var p=pagamentos.find(function(x){return String(x.id)===String(id);});
@@ -1580,7 +1613,7 @@ function renderCardsPagamento(){
   var lista=filtrarPagamentos();
   var total=lista.length;
   var pagos=lista.filter(function(p){return ETAPAS_PAGAS.indexOf(p.etapa)!==-1;}).length;
-  var faturado=lista.reduce(function(s,p){return s+valorNumerico(p.fatValor||'');},0);
+  var faturado=lista.filter(function(p){return p.fatValor&&p.fatMes;}).reduce(function(s,p){return s+valorNumerico(p.fatValor||'');},0);
   el_total.textContent=total;
   el_pagos.textContent=pagos;
   el_and.textContent=total-pagos;
@@ -1897,8 +1930,11 @@ function renderTabelaPagamentos(){
   var aviso=document.getElementById('aviso-vazio-pag');
   if(!tbody)return;
   var lista=filtrarPagamentos();
-  // Ordenar por data+hora de lançamento crescente
+    // Ordenar por Programado primeiro, depois data de lançamento
   lista.sort(function(a,b){
+    var pa=a.programado||'9999-99-99';
+    var pb=b.programado||'9999-99-99';
+    if(pa<pb)return -1;if(pa>pb)return 1;
     var da=a.dtlancamento||'9999';
     var db=b.dtlancamento||'9999';
     if(da<db)return -1;if(da>db)return 1;return 0;
@@ -1935,7 +1971,7 @@ function renderTabelaPagamentos(){
           :'<button class="btn-edit-sm" onclick="faturarPagamento('+p.id+')" style="background:#F0FDF4;color:#059669;border-color:#BBF7D0"><i class="ti ti-receipt"></i> Faturar</button>';
         return'<td>'+fatBtn+'</td>';
       })()+
-      '<td><button class="btn-danger-sm" onclick="removerPagamento('+p.id+')"><i class="ti ti-trash" style="font-size:12px"></i></button></td>'+
+      (perfilAtual==='gestao'?'<td style="display:flex;gap:4px"><button class="btn-edit-sm" onclick="abrirModalEditarPagamento('+p.id+')" title="Editar"><i class="ti ti-pencil" style="font-size:12px"></i></button><button class="btn-danger-sm" onclick="removerPagamento('+p.id+')" title="Remover"><i class="ti ti-trash" style="font-size:12px"></i></button></td>':'<td></td>')+
     '</tr>';
   }).join('');
 }
@@ -2052,6 +2088,47 @@ function exportarCSVPagamentos(){
     <div class="modal-gest-acoes">
       <button class="btn-primary verde" onclick="salvarFaturamento()"><i class="ti ti-check"></i> Faturar</button>
       <button class="btn-sec" onclick="fecharModalFat()"><i class="ti ti-x"></i> Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR PAGAMENTO (GESTÃO) -->
+<div class="overlay" id="overlay-edit-pag">
+  <div class="modal-gest" style="max-width:520px">
+    <div class="modal-gest-titulo"><i class="ti ti-pencil" style="color:#5B21B6"></i> Editar pagamento — Gestão</div>
+    <input type="hidden" id="ep-id">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="form-group"><label>Nº Ticket</label><input type="text" id="ep-ticket" placeholder="Ex: 87543 ou COB"></div>
+      <div class="form-group"><label>Nome</label><input type="text" id="ep-nome" placeholder="Nome do consorciado"></div>
+      <div class="form-group"><label>Grupo</label><input type="text" id="ep-grupo" placeholder="Ex: 0523"></div>
+      <div class="form-group"><label>Cota</label><input type="text" id="ep-cota" placeholder="Ex: 0041"></div>
+      <div class="form-group"><label>Tipo de Processo</label>
+        <select id="ep-tipo">
+          <option value="">Selecione</option>
+          <option>Aquisição</option>
+          <option>Aquisição com Interveniente Quitante</option>
+          <option>Quitação de Financiamento Próprio</option>
+          <option>Construção / Reforma / Ampliação</option>
+          <option>Aquisição de Imóvel na Planta</option>
+          <option>Aquisição de Imóvel Rural</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Data do Contrato</label><input type="date" id="ep-contrato"></div>
+      <div class="form-group"><label>Programado</label><input type="date" id="ep-programado"></div>
+      <div class="form-group"><label>Etapa</label>
+        <select id="ep-etapa">
+          <option value="">Selecione</option>
+          <option>1ª Etapa de Obra</option>
+          <option>Boleto IQ</option>
+          <option>Etapa de Obra</option>
+          <option>Finalização</option>
+          <option>Reprogramado</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-gest-acoes">
+      <button class="btn-primary" style="background:#5B21B6" onclick="salvarEdicaoPagamento()"><i class="ti ti-check"></i> Salvar</button>
+      <button class="btn-sec" onclick="fecharModalEditarPagamento()"><i class="ti ti-x"></i> Cancelar</button>
     </div>
   </div>
 </div>
