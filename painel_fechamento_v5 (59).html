@@ -1091,7 +1091,9 @@ function renderTabela(){
 
     // Colunas financeiras: somente gestão
     if(isGestao){
-      var gestBtn='<button class="btn-edit-sm" onclick="abrirModalGest('+r.id+')" style="margin-left:4px">'+(gestCompleto?'<i class="ti ti-pencil"></i> Editar':'<i class="ti ti-pencil"></i> Preencher')+'</button>';
+      var gestBtn='';
+        if(!r.valor){gestBtn='<button class="btn-edit-sm" onclick="faturarConferencia('+r.id+')" style="background:#F0FDF4;color:#059669;border-color:#BBF7D0;margin-left:4px"><i class="ti ti-receipt"></i> Faturar</button>';}
+        else{gestBtn='<span class="gest-ok" style="margin-left:4px"><i class="ti ti-check" style="font-size:11px"></i> '+formatValor(r.valor)+'</span><button class="btn-edit-sm" onclick="abrirModalGest('+r.id+')" style="margin-left:4px;font-size:11px;padding:2px 8px"><i class="ti ti-pencil"></i></button>';}
       cols+=
         '<td style="font-weight:600">'+(r.valor?formatValor(r.valor):'<span style="color:#9CA3AF">—</span>')+'</td>'+
         '<td>'+formatMesCurto(r.mesfechamento)+'</td>'+
