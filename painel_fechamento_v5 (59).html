@@ -104,6 +104,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .filtros select,.filtros input{border:1px solid #D1D5DB;border-radius:6px;padding:5px 8px;font-size:12px;height:32px;outline:none;font-family:inherit;background:#fff}
 .filtros label{font-size:12px;color:#6B7280;font-weight:500}
 .tabela-wrap{overflow-x:auto}
+.scroll-topo{overflow-x:auto;overflow-y:hidden;height:14px;margin-bottom:2px;border:1px solid #E5E7EB;border-radius:4px}
+.scroll-topo-inner{height:1px;background:transparent}
 .tabela-scroll-top{overflow-x:auto;overflow-y:hidden;height:12px;margin-bottom:2px}
 .tabela-scroll-top-inner{height:1px}
 table{width:100%;border-collapse:collapse;font-size:12px}
@@ -473,7 +475,8 @@ tbody td{padding:8px 10px;color:#374151;white-space:nowrap;vertical-align:middle
         </select>
         <input type="text" id="filtro-pg-busca" placeholder="Buscar ticket ou nome..." oninput="renderTabelaPagamentos();renderCardsPagamento()" style="flex:1;min-width:160px">
       </div>
-      <div class="tabela-wrap">
+      <div class="scroll-topo" id="scroll-top-pag" onscroll="syncScroll(this,'tabela-wrap-pag')"><div class="scroll-topo-inner" id="scroll-top-pag-inner"></div></div>
+      <div class="tabela-wrap" id="tabela-wrap-pag" onscroll="syncScroll(this,'scroll-top-pag')">
         <table>
           <thead>
             <tr>
@@ -743,10 +746,13 @@ function syncScroll(src, targetId){
   var target=document.getElementById(targetId);
   if(target&&target.scrollLeft!==src.scrollLeft)target.scrollLeft=src.scrollLeft;
 }
-function updateScrollTop(){
-  var wrap=document.getElementById('tabela-wrap-conf');
-  var top=document.getElementById('scroll-top-conf-inner');
-  if(wrap&&top)top.style.width=wrap.scrollWidth+'px';
+function updateScrollWidths(){
+  var pairs=[['tabela-wrap-conf','scroll-top-conf-inner'],['tabela-wrap-pag','scroll-top-pag-inner']];
+  pairs.forEach(function(p){
+    var wrap=document.getElementById(p[0]);
+    var inner=document.getElementById(p[1]);
+    if(wrap&&inner)inner.style.width=wrap.scrollWidth+'px';
+  });
 }
 
 function sair(){
@@ -851,9 +857,26 @@ function verificarTicket(val){
   var check=document.getElementById('f-reemissao');
   var tk=val.trim();
   if(!tk){alerta.style.display='none';check.checked=false;return;}
-  // Busca apenas pelo ticket (ignora grupo/cota)
-  var encontrados=registros.filter(function(r){return String(r.ticket)===String(tk);});
-  var legadoEnc=legado.filter(function(l){return String(l.ticket)===String(tk);});
+  var isCOB=tk.toUpperCase().startsWith('COB');
+  var encontrados=isCOB?[]:registros.filter(function(r){return String(r.ticket)===String(tk);});
+  var legadoEnc=isCOB?[]:legado.filter(function(l){return String(l.ticket)===String(tk);});
+  // COB: auto-fill from legado by name
+  if(isCOB){
+    var nomeDigitado=tk.replace(/^cob\s*/i,'').trim();
+    if(nomeDigitado.length>=2){
+      var legCOB=legado.filter(function(l){return l.nome&&l.nome.toUpperCase().includes(nomeDigitado.toUpperCase());});
+      if(legCOB.length){
+        alerta.style.display='block';
+        info.innerHTML='<span style="color:#065F46"><i class="ti ti-history"></i> Legado COB encontrado: '+escH(legCOB[0].nome)+' — Grupo/Cota: '+escH(legCOB[0].grupocota||'—')+'</span>';
+        // Auto-fill grupo/cota
+        var partesCOB=(legCOB[0].grupocota||'').split('/');
+        var grp=document.getElementById('f-grupo');var cot=document.getElementById('f-cota');
+        if(grp&&!grp.value)grp.value=partesCOB[0]||'';
+        if(cot&&!cot.value)cot.value=partesCOB.slice(1).join('/')||'';
+      }
+    }
+    return;
+  }
   if(encontrados.length||legadoEnc.length){
     alerta.style.display='block';
     var linhas=[];
@@ -1362,7 +1385,7 @@ function processarLinhas(rows){
   }
   if(!importados){alert('Nenhum registro válido encontrado no arquivo.');return;}
   registros=registros.concat(novos);
-  salvar();renderFiltroMes();renderFiltroConferente();renderTabela();renderCards();
+  salvar();renderFiltroMes();renderFiltroConferente();renderTabela();renderCards();setTimeout(updateScrollWidths,100);
   alert('✅ '+importados+' registro(s) importado(s) com sucesso!');
 }
 
@@ -1385,7 +1408,7 @@ function excluirEmLote(){
   if(!ids.length){alert('Selecione ao menos um registro para excluir.');return;}
   if(!confirm('Excluir '+ids.length+' registro(s) selecionado(s)? Esta ação não pode ser desfeita.'))return;
   registros=registros.filter(function(r){return ids.indexOf(String(r.id))===-1;});
-  salvar();renderFiltroMes();renderFiltroConferente();renderTabela();renderCards();
+  salvar();renderFiltroMes();renderFiltroConferente();renderTabela();renderCards();setTimeout(updateScrollWidths,100);
   alert('✅ '+ids.length+' registro(s) excluído(s) com sucesso!');
 }
 
@@ -1723,13 +1746,42 @@ function exportarLegadoPendente(){
 
 function salvarPagamentos(){salvar();}
 
+function preencherDoCOBIdx(idx){
+  var l=window._cobResultados&&window._cobResultados[idx];
+  if(!l)return;
+  document.getElementById('pg-nome').value=l.nome||'';
+  var partes=(l.grupocota||'').split('/');
+  document.getElementById('pg-grupo').value=partes[0]||'';
+  document.getElementById('pg-cota').value=partes.slice(1).join('/')||'';
+  if(l.contrato)document.getElementById('pg-contrato').value=l.contrato;
+  document.getElementById('pg-conferencia-info').style.display='none';
+}
+
 function buscarConferenciaPorTicket(val){
   var tk=val.trim();
   var info=document.getElementById('pg-conferencia-info');
   var aviso=document.getElementById('pg-conferencia-aviso');
   info.style.display='none';aviso.style.display='none';
   if(!tk)return;
-  var encontrados=registros.filter(function(r){return r.ticket===tk;});
+  // COB: buscar por nome no legado
+  var isCOB=tk.toUpperCase().startsWith('COB');
+  if(isCOB){
+    var nomeDigitado=tk.replace(/^cob\s*/i,'').trim();
+    if(nomeDigitado.length<2)return;
+    var legCOB=legado.filter(function(l){return l.nome&&l.nome.toUpperCase().includes(nomeDigitado.toUpperCase());});
+    if(legCOB.length){
+      info.style.display='block';
+      info.innerHTML='<strong><i class="ti ti-history"></i> Encontrado no legado (COB):</strong><br>'+
+        legCOB.slice(0,5).map(function(l){
+          
+        }).join('');
+    } else {
+      aviso.style.display='block';
+      aviso.innerHTML='<i class="ti ti-alert-triangle"></i> Nenhum registro COB encontrado para "'+escH(nomeDigitado)+'" no legado.';
+    }
+    return;
+  }
+  var encontrados=registros.filter(function(r){return r.ticket&&String(r.ticket)===String(tk);});
   if(encontrados.length){
     info.style.display='block';
     info.innerHTML='<strong><i class="ti ti-check"></i> Conferência encontrada:</strong><br>'+
@@ -1787,7 +1839,8 @@ function adicionarPagamento(){
   var nm=document.getElementById('pg-nome').value.trim();
   var gr=document.getElementById('pg-grupo').value.trim();
   var co=document.getElementById('pg-cota').value.trim();
-  if(!tk&&!nm){alert('Preencha ao menos o Ticket ou Nome.');return;}
+  if(!tk){alert('O número do ticket é obrigatório.');return;}
+  if(!nm){alert('O nome do consorciado é obrigatório.');return;}
   var pagExiste=tk&&pagamentos.some(function(p){return String(p.ticket)===String(tk);});
   var checkReprog=document.getElementById('pg-reprogramacao-check');
   var isReprog=checkReprog&&checkReprog.checked;
@@ -1853,7 +1906,7 @@ function renderTabelaPagamentos(){
   if(!lista.length){tbody.innerHTML='';aviso.style.display='block';return;}
   aviso.style.display='none';
   tbody.innerHTML=lista.map(function(p,i){
-    var conf=registros.filter(function(r){return r.ticket===p.ticket;});
+    var conf=p.ticket&&p.ticket.toUpperCase()!=='COB'?registros.filter(function(r){return r.ticket&&String(r.ticket)===String(p.ticket);}):[];
     var confCell=conf.length
       ?'<span style="font-size:11px;color:#166534;background:#DCFCE7;border-radius:20px;padding:2px 8px"><i class="ti ti-check" style="font-size:10px"></i> '+formatData(conf[0].dtcontrato)+(conf[0].conferente?' · '+escH(conf[0].conferente):'')+'</span>'
       :'<span style="font-size:11px;color:#854D0E;background:#FEF9C3;border-radius:20px;padding:2px 8px">Não vinculado</span>';
