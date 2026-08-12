@@ -1912,6 +1912,21 @@ function buscarConferenciaPorTicket(val){
     }
     return;
   }
+  // Check pagamentos for reprogramacao (roda sempre, independente de conferência ou legado)
+  var pagExistentes=pagamentos.filter(function(p){return String(p.ticket)===String(tk);});
+  var alertaReprog=document.getElementById('pg-reprogramacao-alerta');
+  var infoReprog=document.getElementById('pg-reprogramacao-info');
+  var checkReprog=document.getElementById('pg-reprogramacao-check');
+  if(pagExistentes.length&&alertaReprog){
+    alertaReprog.style.display='block';
+    infoReprog.innerHTML=pagExistentes.map(function(p){
+      return'<span style="display:block"><i class="ti ti-cash" style="font-size:11px"></i> '+
+        escH(p.nome||'—')+' — Etapa: '+escH(p.etapa||'—')+' — Lançado em: '+formatDataHora(p.dtlancamento)+'</span>';
+    }).join('');
+  } else if(alertaReprog){
+    alertaReprog.style.display='none';
+    if(checkReprog)checkReprog.checked=false;
+  }
   var encontrados=registros.filter(function(r){return r.ticket&&String(r.ticket)===String(tk);});
   if(encontrados.length){
     info.style.display='block';
@@ -1931,22 +1946,6 @@ function buscarConferenciaPorTicket(val){
     var dtConf=r0.dtcontrato;
     if(!dtConf){var leg0=legado.find(function(l){return String(l.ticket)===String(tk);});if(leg0)dtConf=leg0.contrato;}
     if(!document.getElementById('pg-contrato').value&&dtConf)document.getElementById('pg-contrato').value=dtConf;
-  // Check pagamentos for reprogramacao
-  var pagExistentes=pagamentos.filter(function(p){return String(p.ticket)===String(tk);});
-  var alertaReprog=document.getElementById('pg-reprogramacao-alerta');
-  var infoReprog=document.getElementById('pg-reprogramacao-info');
-  var checkReprog=document.getElementById('pg-reprogramacao-check');
-  if(pagExistentes.length&&alertaReprog){
-    alertaReprog.style.display='block';
-    infoReprog.innerHTML=pagExistentes.map(function(p){
-      return'<span style="display:block"><i class="ti ti-cash" style="font-size:11px"></i> '+
-        escH(p.nome||'—')+' — Etapa: '+escH(p.etapa||'—')+' — Lançado em: '+formatDataHora(p.dtlancamento)+'</span>';
-    }).join('');
-  } else if(alertaReprog){
-    alertaReprog.style.display='none';
-    if(checkReprog)checkReprog.checked=false;
-  }
-
   } else {
     // Not found in conferencia — check legado for historical data
     var legEncontrado=legado.find(function(l){return String(l.ticket)===String(tk);});
