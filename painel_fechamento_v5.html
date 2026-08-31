@@ -458,6 +458,8 @@ tbody td{padding:8px 10px;color:#374151;white-space:nowrap;vertical-align:middle
         </div>
       </div>
       <div class="filtros">
+        <label>Mês:</label>
+        <select id="filtro-pg-mes" onchange="renderTabelaPagamentos();renderCardsPagamento()"><option value="">Todos</option></select>
         <label>Etapa:</label>
         <select id="filtro-pg-etapa" onchange="renderTabelaPagamentos();renderCardsPagamento()">
           <option value="">Todas</option>
@@ -712,11 +714,11 @@ function iniciarPainel(){
     document.getElementById('cards-top').style.display='';
     document.getElementById('btn-importar-pag-wrap').style.display='none';
   }
+  renderFiltroMes();
   renderCards();
   renderChips();
   renderSelectConferente();
   renderFiltroConferente();
-  renderFiltroMes();
   // Show mês filter by default (no date selected)
   var lm=document.getElementById('label-mes');
   var sm=document.getElementById('filtro-mes');
@@ -780,12 +782,13 @@ function sair(){
 function renderCards(){
   var container=document.getElementById('cards-top');
   var isGestao=perfilAtual==='gestao';
-  var total=registros.length;
-  var reemissoes=registros.filter(function(r){return r.reemissao;}).length;
+  var lista=filtrarRegistros();
+  var total=lista.length;
+  var reemissoes=lista.filter(function(r){return r.reemissao;}).length;
   var conferencia=total-reemissoes;
-  var fase080=registros.filter(function(r){return r.fase080;}).length;
-  var gestPend=registros.filter(function(r){return!(r.valor&&r.mesfechamento);}).length;
-  var valorTotal=registros.reduce(function(s,r){return s+valorNumerico(r.valor);},0);
+  var fase080=lista.filter(function(r){return r.fase080;}).length;
+  var gestPend=lista.filter(function(r){return!(r.valor&&r.mesfechamento);}).length;
+  var valorTotal=lista.reduce(function(s,r){return s+valorNumerico(r.valor);},0);
 
   var html='';
   var cols=isGestao?5:3;
@@ -816,9 +819,11 @@ function renderCabecalhoTabela(){
 function renderFiltroMes(){
   var sel=document.getElementById('filtro-mes');
   var atual=sel.value;
-  var meses=[...new Set(registros.map(function(r){return r.mesfechamento;}).filter(Boolean))].sort();
+  var mesReal=mesAtualReal();
+  var meses=[...new Set(registros.map(function(r){return mesDe(r.dtlancamento);}).filter(Boolean).concat([mesReal]))].sort();
   sel.innerHTML='<option value="">Todos</option>'+meses.map(function(m){return'<option value="'+m+'">'+formatarMes(m)+'</option>';}).join('');
   if(atual)sel.value=atual;
+  else if(!sel.dataset.inicializado){sel.value=mesReal;sel.dataset.inicializado='1';}
 }
 
 // ── EQUIPE ──
@@ -1141,7 +1146,7 @@ function filtrarRegistros(){
       // Filtrar por data de validação (dtcontrato)
       if(!r.dtcontrato||r.dtcontrato!==filtroData)return false;
     } else if(mes){
-      if(r.mesfechamento!==mes)return false;
+      if(mesDe(r.dtlancamento)!==mes)return false;
     }
     if(conf&&r.conferente!==conf)return false;
     if(fase==='sim'&&!r.fase080)return false;
@@ -1154,6 +1159,7 @@ function filtrarRegistros(){
 }
 
 function renderTabela(){
+  renderFiltroMes();
   var tbody=document.getElementById('tbody');
   var aviso=document.getElementById('aviso-vazio');
   var isGestao=perfilAtual==='gestao';
@@ -1577,6 +1583,8 @@ function formatDataHora(iso){
   var mi=String(d.getMinutes()).padStart(2,'0');
   return dd+'/'+mm+'/'+yy+' '+hh+':'+mi;
 }
+function mesDe(iso){if(!iso)return'';return iso.slice(0,7);}
+function mesAtualReal(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
 function formatarMes(m){if(!m)return'— Mês não definido';var p=m.split('-');var ms=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];return ms[parseInt(p[1])-1]+' / '+p[0];}
 function formatMesCurto(m){if(!m)return'—';var p=m.split('-');var ms=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];return ms[parseInt(p[1])-1]+'/'+p[0];}
 function atualizarMes(){mesFechamento=document.getElementById('inp-mes-fechamento').value;document.getElementById('badge-mes-top').textContent=formatarMes(mesFechamento);salvar();renderCards();}
@@ -2027,13 +2035,27 @@ function removerPagamento(id){
   salvarPagamentos();renderTabelaPagamentos();renderCardsPagamento();
 }
 
+function renderFiltroMesPagamento(){
+  var sel=document.getElementById('filtro-pg-mes');
+  if(!sel)return;
+  var atual=sel.value;
+  var mesReal=mesAtualReal();
+  var meses=[...new Set(pagamentos.map(function(p){return mesDe(p.dtlancamento);}).filter(Boolean).concat([mesReal]))].sort();
+  sel.innerHTML='<option value="">Todos</option>'+meses.map(function(m){return'<option value="'+m+'">'+formatarMes(m)+'</option>';}).join('');
+  if(atual)sel.value=atual;
+  else if(!sel.dataset.inicializado){sel.value=mesReal;sel.dataset.inicializado='1';}
+}
+
 function filtrarPagamentos(){
   var etapa=document.getElementById('filtro-pg-etapa').value;
+  var mesEl=document.getElementById('filtro-pg-mes');
+  var mes=mesEl?mesEl.value:'';
   var busca=(document.getElementById('filtro-pg-busca').value||'').toLowerCase();
   var reprogEl=document.getElementById('filtro-pg-reprog');
   var reprog=reprogEl?reprogEl.value:'';
   return pagamentos.filter(function(p){
     if(etapa&&p.etapa!==etapa)return false;
+    if(mes&&mesDe(p.dtlancamento)!==mes)return false;
     if(reprog==='sim'&&!p.reprogramacao)return false;
     if(reprog==='nao'&&p.reprogramacao)return false;
     if(busca&&!((p.ticket||'').toLowerCase().includes(busca)||(p.nome||'').toLowerCase().includes(busca)))return false;
@@ -2042,6 +2064,7 @@ function filtrarPagamentos(){
 }
 
 function renderTabelaPagamentos(){
+  renderFiltroMesPagamento();
   var tbody=document.getElementById('tbody-pagamentos');
   var aviso=document.getElementById('aviso-vazio-pag');
   if(!tbody)return;
