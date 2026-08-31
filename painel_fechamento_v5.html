@@ -1979,7 +1979,21 @@ function adicionarPagamento(){
   var pagExiste=tk&&pagamentos.some(function(p){return String(p.ticket)===String(tk);});
   var checkReprog=document.getElementById('pg-reprogramacao-check');
   var isReprog=checkReprog&&checkReprog.checked;
-  if(pagExiste&&!isReprog){alert('Este ticket já foi lançado. Marque a caixa de reprogramação para continuar.');return;}
+  if(pagExiste&&!isReprog){
+    var alertaReprog=document.getElementById('pg-reprogramacao-alerta');
+    var infoReprog=document.getElementById('pg-reprogramacao-info');
+    if(alertaReprog&&infoReprog){
+      var pagsIguais=pagamentos.filter(function(p){return String(p.ticket)===String(tk);});
+      infoReprog.innerHTML=pagsIguais.map(function(p){
+        return'<span style="display:block"><i class="ti ti-cash" style="font-size:11px"></i> '+
+          escH(p.nome||'—')+' — Etapa: '+escH(p.etapa||'—')+' — Lançado em: '+formatDataHora(p.dtlancamento)+'</span>';
+      }).join('');
+      alertaReprog.style.display='block';
+      alertaReprog.scrollIntoView({behavior:'smooth',block:'center'});
+    }
+    alert('Este ticket já foi lançado. Marque a caixa de reprogramação para continuar.');
+    return;
+  }
   pagamentos.unshift({
     id:Date.now(),
     ticket:tk,
