@@ -1971,6 +1971,11 @@ function adicionarPagamento(){
   var co=document.getElementById('pg-cota').value.trim();
   if(!tk){alert('O número do ticket é obrigatório.');return;}
   if(!nm){alert('O nome do consorciado é obrigatório.');return;}
+  // "COB" sozinho não identifica ninguém — completa com grupo/cota (ou nome) pra não colidir entre pessoas diferentes
+  if(/^cob$/i.test(tk)){
+    var sufixoCOB=(gr&&co)?(gr+'-'+co):nm.toUpperCase().replace(/\s+/g,'-');
+    tk='COB-'+sufixoCOB;
+  }
   var pagExiste=tk&&pagamentos.some(function(p){return String(p.ticket)===String(tk);});
   var checkReprog=document.getElementById('pg-reprogramacao-check');
   var isReprog=checkReprog&&checkReprog.checked;
