@@ -666,10 +666,13 @@ function iniciarPainel(){
   el.textContent=nomes[perfilAtual];
   el.className='badge-perfil '+badges[perfilAtual];
 
-  if(mesFechamento){
-    document.getElementById('inp-mes-fechamento').value=mesFechamento;
-    document.getElementById('badge-mes-top').textContent=formatarMes(mesFechamento);
+  var mesReal0=mesAtualReal();
+  if(mesFechamento!==mesReal0){
+    mesFechamento=mesReal0;
+    salvar();
   }
+  document.getElementById('inp-mes-fechamento').value=mesFechamento;
+  document.getElementById('badge-mes-top').textContent=formatarMes(mesFechamento);
 
   // Seções visíveis por perfil
   document.getElementById('secao-conferencia').style.display=perfilAtual==='conferencia'?'block':'none';
