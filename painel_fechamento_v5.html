@@ -628,8 +628,8 @@ function carregarDoServidor(callback){
     if(d.mesFechamento)mesFechamento=d.mesFechamento;
     if(d.pagamentos)pagamentos=d.pagamentos;
     if(d.legado)legado=d.legado;
-    if(callback)callback();
-  }).catch(function(e){console.error('Servidor offline, usando dados locais');if(callback)callback();});
+    if(callback)callback(true);
+  }).catch(function(e){console.error('Servidor offline, usando dados locais');if(callback)callback(false);});
 }
 
 // ── PERFIS ──
@@ -652,10 +652,10 @@ function entrar(){
   }
   perfilAtual=perfilSelecionado;
   carregar(); // fallback local
-  carregarDoServidor(function(){iniciarPainel();});
+  carregarDoServidor(function(sucesso){iniciarPainel(sucesso);});
 }
 
-function iniciarPainel(){
+function iniciarPainel(cargaOk){
   carregar();
   document.getElementById('tela-login').style.display='none';
   document.getElementById('painel').style.display='block';
@@ -667,7 +667,7 @@ function iniciarPainel(){
   el.className='badge-perfil '+badges[perfilAtual];
 
   var mesReal0=mesAtualReal();
-  if(mesFechamento!==mesReal0){
+  if(cargaOk&&mesFechamento!==mesReal0){
     mesFechamento=mesReal0;
     salvar();
   }
@@ -1750,9 +1750,11 @@ function atualizarCardsIniciais(){
   var el_conf=document.getElementById('gi-cnt-conf');
   var el_pag=document.getElementById('gi-cnt-pag');
   var el_leg=document.getElementById('gi-cnt-leg');
-  var _reem=registros.filter(function(r){return r.reemissao;}).length;
-  if(el_conf)el_conf.textContent=(registros.length-_reem)+' conf · '+_reem+' reem';
-  if(el_pag)el_pag.textContent=pagamentos.length;
+  var listaReg=filtrarRegistros();
+  var listaPag=filtrarPagamentos();
+  var _reem=listaReg.filter(function(r){return r.reemissao;}).length;
+  if(el_conf)el_conf.textContent=(listaReg.length-_reem)+' conf · '+_reem+' reem';
+  if(el_pag)el_pag.textContent=listaPag.length;
   if(el_leg)el_leg.textContent=legado.filter(function(l){return getLegadoStatus(l.ticket)==='pendente';}).length;
 }
 
