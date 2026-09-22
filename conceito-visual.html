@@ -1,0 +1,2375 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conceito Visual — Esteira Imóvel</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0F1E3D;
+  --ink-soft:#2C3C60;
+  --paper:#FAF9F6;
+  --card:#FFFFFF;
+  --line:#E4E2DB;
+  --line-soft:#EDEBE4;
+  --accent:#EE6B0E;
+  --accent-l:#F5822C;
+  --accent-soft:#FDEEE1;
+  --green:#3D7A4E;
+  --green-soft:#E9F2EA;
+  --amber:#9C6B14;
+  --amber-soft:#F5EDDD;
+  --rose:#9C3F38;
+  --rose-soft:#F5E7E4;
+  --muted:#7A776E;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Work Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;}
+.mono{font-family:'IBM Plex Mono',monospace;}
+
+.header{background:var(--ink);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-bar{width:3px;height:20px;background:var(--accent-l);}
+.brand-name{font-size:14px;font-weight:700;letter-spacing:3px;color:#fff;text-transform:uppercase;}
+.brand-name span{color:var(--accent-l);}
+.hdate{font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.5px;}
+
+.tabs{background:var(--card);display:flex;padding:0 28px;border-bottom:1px solid var(--line);}
+.tab{font-size:12px;font-weight:600;letter-spacing:.3px;color:var(--muted);padding:14px 18px;border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;}
+.tab.on{color:var(--ink);border-bottom-color:var(--accent);}
+
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px;}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.h1{font-size:22px;font-weight:700;letter-spacing:-.2px;margin-bottom:24px;}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:6px;margin-bottom:20px;overflow:hidden;}
+.card-head{padding:14px 20px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-size:13px;font-weight:700;letter-spacing:.2px;}
+.card-body{padding:20px;}
+
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.field{display:flex;flex-direction:column;gap:6px;}
+.field label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);}
+.field label .req{color:var(--rose);}
+.field input,.field select{padding:9px 12px;border:1px solid var(--line);border-radius:5px;font-family:'Work Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--paper);outline:none;transition:border-color .15s;}
+.field input:focus,.field select:focus{border-color:var(--accent);}
+.field.ticket input{font-family:'IBM Plex Mono',monospace;font-weight:600;letter-spacing:.5px;}
+
+.sit-group{display:flex;gap:8px;padding:2px 0;}
+.stamp{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;
+  padding:7px 14px;border:1.5px solid var(--line);border-radius:3px;background:transparent;color:var(--muted);
+  cursor:pointer;transition:all .15s;position:relative;
+}
+.stamp.sel{border-style:double;border-width:4px;}
+.stamp.sel.apr{border-color:var(--green);color:var(--green);background:var(--green-soft);}
+.stamp.sel.pend{border-color:var(--amber);color:var(--amber);background:var(--amber-soft);}
+.stamp.sel.recus{border-color:var(--rose);color:var(--rose);background:var(--rose-soft);}
+.stamp.sel.neutro{border-color:var(--ink-soft);color:var(--ink);background:var(--line-soft);}
+.sit-sub{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:12px 0 6px;}
+.sit-sub:first-child{margin-top:0;}
+
+.btn{width:100%;padding:12px;background:var(--ink);color:#fff;border:none;border-radius:5px;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-top:6px;}
+.btn:hover{background:var(--accent);}
+
+/* preview de cards de painel */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.stat-card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:16px 18px;}
+.etapa-card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:16px 18px;cursor:pointer;transition:border-color .15s,transform .1s;text-align:left;font-family:'Work Sans',sans-serif;}
+.etapa-card:hover{border-color:var(--accent);}
+.etapa-card:active{transform:scale(.98);}
+.etapa-card.on{border-color:var(--ink);border-width:2px;}
+.det-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line-soft);font-size:12px;}
+.det-banner{background:var(--ink);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;}
+.badge-sit{padding:5px 12px;border-radius:999px;font-size:11px;font-weight:700;background:var(--line-soft);color:var(--ink-soft);white-space:nowrap;}
+.toggle-tabela{background:none;border:none;cursor:pointer;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:0;}
+.toggle-tabela:hover{color:var(--ink);}
+.det-table{width:100%;border-collapse:collapse;font-size:12px;}
+.det-table th{text-align:left;padding:7px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--line);}
+.det-table td{padding:8px 8px;border-bottom:1px solid var(--line-soft);}
+.det-table td:first-child{font-family:'IBM Plex Mono',monospace;font-weight:600;}
+.esteira-card{border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-bottom:14px;}
+.esteira-head{background:var(--ink);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;}
+.esteira-nome{font-size:15px;font-weight:700;color:#fff;}
+.esteira-sub{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px;}
+.esteira-stats{display:flex;gap:24px;text-align:right;}
+.esteira-stat-label{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.45);}
+.esteira-stat-val{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;color:#fff;}
+.esteira-foot{background:var(--gray-l,var(--line-soft));padding:10px 20px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.esteira-foot a{color:var(--accent);font-weight:700;cursor:pointer;text-decoration:none;}
+.esteira-bar-wrap{height:6px;background:var(--line);border-radius:999px;overflow:hidden;margin:8px 20px 0;}
+.esteira-bar-fill{height:100%;background:var(--accent);border-radius:999px;transition:width .4s;}
+.det-row:last-child{border-bottom:none;}
+.stat-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px;}
+.stat-val{font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:600;color:var(--ink);}
+.stat-val.accent{color:var(--accent);}
+.note{font-size:11px;color:var(--muted);margin-top:32px;padding-top:16px;border-top:1px dashed var(--line);}
+.analista-row{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border:1px solid var(--line);border-radius:5px;font-size:13px;background:var(--paper);}
+.row-del{background:none;border:none;color:var(--rose);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;padding:0;}
+.row-del:hover{text-decoration:underline;}
+.caso-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line-soft);font-size:12px;}
+.caso-row:last-child{border-bottom:none;}
+.caso-row .et{background:var(--ink);color:#fff;border-radius:3px;padding:2px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+.caso-row .tk{font-family:'IBM Plex Mono',monospace;font-weight:600;white-space:nowrap;}
+.caso-row .an{color:var(--muted);flex:1;}
+.caso-row .ts{color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:11px;white-space:nowrap;}
+</style>
+</head>
+<body>
+
+<div id="tela-ponto" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px;">
+  <div class="brand" style="margin-bottom:10px;"><div class="brand-bar"></div><div class="brand-name" style="color:var(--ink);">ESTEIRA <span>IMÓVEL</span></div></div>
+
+  <div id="ponto-passo-nome" class="card" style="width:100%;max-width:380px;">
+    <div class="card-head"><div class="card-title">QUEM É VOCÊ?</div></div>
+    <div class="card-body">
+      <div class="field" style="margin-bottom:14px;">
+        <label>Seu nome <span class="req">*</span></label>
+        <select id="sel-ponto-nome">
+          <option value="">— selecione seu nome —</option>
+        </select>
+      </div>
+      <button class="btn" onclick="registrarPonto()">Registrar entrada →</button>
+      <div class="fb" id="fb-ponto" style="font-size:12px;font-weight:600;text-align:center;min-height:18px;margin-top:6px;"></div>
+      <div style="text-align:center;margin-top:10px;">
+        <a onclick="acessarComoGestao()" style="font-size:11px;color:var(--muted);text-decoration:underline;cursor:pointer;">Sou da Gestão</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="ponto-passo-provisao" class="card" style="width:100%;max-width:460px;display:none;">
+    <div class="card-head"><div class="card-title">PROVISIONAMENTO — PRÓXIMA SEMANA</div></div>
+    <div class="card-body">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">É sexta-feira — antes de continuar, informe seu provisionamento para a semana que vem.</div>
+      <div id="provisao-dias" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;"></div>
+      <button class="btn" id="btn-salvar-provisao" onclick="salvarProvisao()">Salvar provisionamento →</button>
+      <div class="fb" id="fb-provisao" style="font-size:12px;font-weight:600;text-align:center;min-height:18px;margin-top:6px;"></div>
+      <button onclick="pularProvisao()" style="background:none;border:none;color:var(--muted);font-size:11px;text-decoration:underline;cursor:pointer;margin-top:8px;width:100%;">Pular por agora</button>
+    </div>
+  </div>
+
+</div>
+
+<div id="app-principal" style="display:none;">
+
+<div class="header">
+  <div class="brand"><div class="brand-bar"></div><div class="brand-name">ESTEIRA <span>IMÓVEL</span></div></div>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div class="hdate" id="relogio-cabecalho">—</div>
+    <button onclick="finalizarDia()" style="background:none;border:1px solid rgba(255,255,255,.3);color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:6px 14px;border-radius:5px;cursor:pointer;">Finalizar dia</button>
+  </div>
+</div>
+
+<div class="tabs" id="tabs-principal">
+  <button class="tab" onclick="trocarTab('lancar', this)">Lançar Caso</button>
+  <button class="tab" onclick="trocarTab('painel', this)">Painel</button>
+  <button class="tab on" onclick="trocarTab('ponto', this)">Meu Ponto</button>
+  <button class="tab" onclick="trocarTab('gestao', this)">Gestão</button>
+</div>
+
+<div class="wrap" id="tab-lancar" style="display:none;">
+  <div class="eyebrow">Novo lançamento</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+    <div class="h1" style="margin-bottom:0;">Registro de Produção</div>
+    <div style="background:var(--accent-soft);border:1px solid var(--accent);border-radius:999px;padding:7px 16px;font-size:12px;font-weight:700;color:var(--accent);white-space:nowrap;">
+      🆕 Casos novos hoje: <span class="mono" id="contador-novos">0</span>
+    </div>
+  </div>
+  <div style="height:14px;"></div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-title" id="titulo-etapa">ETAPA 1 · VIABILIDADE</div></div>
+    <div class="card-body">
+      <div class="field" style="margin-bottom:14px;">
+        <label>Você é <span class="req">*</span></label>
+        <select id="sel-analista">
+          <option value="">— selecione seu nome —</option>
+        </select>
+      </div>
+      <div class="fg">
+        <div class="field"><label>Etapa <span class="req">*</span></label>
+          <select id="sel-etapa" onchange="trocarEtapa()">
+            <option value="Viabilidade">Viabilidade</option>
+            <option value="Vistoria">Vistoria</option>
+            <option value="Tarifas">Tarifas</option>
+            <option value="Conformidade">Conformidade</option>
+            <option value="Validação">Validação</option>
+            <option value="Emissão">Emissão</option>
+            <option value="Atendimento">Atendimento</option>
+            <option disabled>──────────</option>
+            <option value="SEDEX">SEDEX (envio ao cliente)</option>
+          </select>
+        </div>
+        <div class="field ticket"><label>Ticket <span class="req">*</span></label>
+          <input type="text" placeholder="TCK-000000" id="inp-ticket" oninput="checarMemoria(); checarSedex();">
+        </div>
+      </div>
+      <div class="fg" id="memoria-badge" style="display:none;grid-template-columns:1fr;margin-bottom:14px;">
+        <div style="background:var(--accent-soft);border:1px solid var(--accent);border-radius:5px;padding:9px 13px;font-size:12px;color:var(--ink);"><span class="mono" style="font-weight:600;">✓ Encontrado na memória</span> — <span id="memoria-txt"></span></div>
+      </div>
+      <div id="alerta-fgts" style="display:none;margin-bottom:14px;border-radius:5px;padding:10px 13px;font-size:13px;font-weight:700;"></div>
+      <div class="fg" id="campo-nome-operacao">
+        <div class="field" id="campo-data-entrada"><label>Data de entrada</label><input type="date" id="inp-data-entrada"></div>
+        <div class="field"><label>Nome do cliente</label><input type="text" id="inp-nome" placeholder="Nome completo"></div>
+      </div>
+      <div class="field" id="campo-operacao" style="margin-bottom:14px;">
+        <label>Tipo de operação <span class="req">*</span></label>
+        <select id="sel-operacao">
+          <option value="">— selecione —</option>
+          <option>Aquisição com IQ</option>
+          <option>Aquisição com FGTS</option>
+          <option>Aquisição com IQ/FGTS</option>
+          <option>Aquisição Simples</option>
+          <option>Quitação de Financiamento Próprio</option>
+          <option>Reforma/Construção/Ampliação</option>
+          <option>Construção em Terreno Próprio com FGTS</option>
+          <option>Rural</option>
+          <option>Imóvel na Planta</option>
+        </select>
+      </div>
+      <div class="field" id="campo-tipo-bem" style="margin-bottom:14px;">
+        <label>Tipo de bem <span class="req">*</span></label>
+        <select id="sel-tipo-bem">
+          <option value="">— selecione —</option>
+          <option>Imóvel</option>
+          <option>Apartamento</option>
+          <option>Terreno</option>
+          <option>Comercial</option>
+        </select>
+      </div>
+      <div class="field" id="campo-fgts" style="margin-bottom:14px;">
+        <label>FGTS <span class="req">*</span></label>
+        <div class="sit-group" data-multi="false" id="grupo-fgts">
+          <button class="stamp" data-kind="neutro">Sim</button>
+          <button class="stamp" data-kind="neutro">Não</button>
+        </div>
+      </div>
+      <div class="fg" id="campo-vendedor" style="display:none;">
+        <div class="field"><label>Tipo de vendedor <span class="req">*</span></label>
+          <select id="sel-tipo-vendedor">
+            <option value="">— selecione —</option>
+            <option>PF</option>
+            <option>PJ</option>
+          </select>
+        </div>
+        <div class="field"><label>Quantidade de vendedores <span class="req">*</span></label>
+          <input type="number" id="inp-qtd-vendedores" min="1" placeholder="Ex: 2">
+        </div>
+      </div>
+      <div class="field" id="campo-extra" style="margin-bottom:14px;display:none;">
+        <label id="extra-label">Tipo <span class="req">*</span></label>
+        <select id="sel-extra"></select>
+      </div>
+      <div class="field" id="campo-situacao" style="margin-bottom:14px;">
+        <label>Situação <span class="req">*</span></label>
+        <div id="situacao-container"></div>
+      </div>
+      <div class="field" id="campo-contato" style="margin-bottom:14px;">
+        <label>Houve contato com o cliente? <span class="req">*</span></label>
+        <div class="sit-group" data-multi="false" id="grupo-contato">
+          <button class="stamp" data-kind="neutro">Sim</button>
+          <button class="stamp" data-kind="neutro">Não</button>
+        </div>
+      </div>
+      <div class="field" id="campo-tarifas" style="margin-bottom:14px;display:none;">
+        <label>Tarifas pagas? <span class="req">*</span></label>
+        <div class="sit-group" data-multi="false" id="grupo-tarifas">
+          <button class="stamp" data-kind="neutro">Sim</button>
+          <button class="stamp" data-kind="neutro">Não</button>
+        </div>
+      </div>
+      <div id="sedex-vazio" style="display:none;font-size:11px;color:var(--muted);font-style:italic;margin-bottom:14px;"></div>
+      <div id="sedex-campos" style="display:none;margin-bottom:14px;">
+        <div class="sit-sub">SEDEX · envio ao cliente</div>
+        <div class="field" style="margin-bottom:14px;">
+          <label>Tipo de envio <span class="req">*</span></label>
+          <div class="sit-group" data-multi="false" id="grupo-tipo-envio">
+            <button class="stamp" data-kind="neutro" onclick="trocarTipoEnvio('Físico')">Físico (rastreio)</button>
+            <button class="stamp" data-kind="neutro" onclick="trocarTipoEnvio('Digital')">Registro digital</button>
+          </div>
+        </div>
+        <div class="fg">
+          <div class="field"><label>Data de postagem <span class="req">*</span></label><input type="date" id="inp-sedex-data"></div>
+          <div class="field" id="campo-sedex-rastreio"><label>Código de rastreio <span class="req">*</span></label><input type="text" id="inp-sedex-rastreio" placeholder="BR000000000BR"></div>
+        </div>
+        <button class="btn" style="background:var(--ink-soft);" onclick="registrarSedex()">Registrar envio →</button>
+        <div class="fb" id="fb-sedex" style="font-size:12px;font-weight:600;text-align:center;min-height:20px;margin-top:6px;"></div>
+      </div>
+      <button class="btn" id="btn-registrar-caso" onclick="registrarCaso()">Registrar caso →</button>
+      <div class="fb" id="fb-registro" style="font-size:12px;font-weight:600;text-align:center;min-height:20px;margin-top:6px;"></div>
+      <div id="banner-novo-caso" style="display:none;margin-top:10px;background:var(--green-soft);border:1.5px solid var(--green);border-radius:6px;padding:12px 16px;text-align:center;">
+        <div style="font-size:14px;font-weight:700;color:var(--green);">✓ Novo caso contabilizado!</div>
+        <div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">Total de casos novos hoje: <span class="mono" id="banner-novo-total" style="font-weight:700;"></span></div>
+      </div>
+      <div style="margin-top:4px;padding-top:10px;border-top:1px dashed var(--line);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;">
+        <span>Lançamento registrado automaticamente ao salvar</span>
+        <span class="mono" id="ts-lancamento"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="eyebrow" style="margin-top:32px;">Meu resumo do dia</div>
+  <div class="grid3">
+    <div class="stat-card"><div class="stat-label">Casos hoje (equipe)</div><div class="stat-val" id="stat-equipe">0</div></div>
+    <div class="stat-card"><div class="stat-label">Meus casos hoje</div><div class="stat-val accent" id="stat-meu">0</div></div>
+    <div class="stat-card"><div class="stat-label">Tempo médio entre análises</div><div class="stat-val" id="stat-tempo">—</div></div>
+  </div>
+
+  <div class="eyebrow" style="margin-top:32px;">Meus casos lançados hoje</div>
+  <div class="card">
+    <div class="card-body" id="lista-casos">
+      <div style="font-size:12px;color:var(--muted);font-style:italic;">Selecione seu nome e registre um caso pra ver aqui.</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="wrap" id="tab-painel" style="display:none;">
+  <div class="eyebrow">Visão macro · equipe</div>
+  <div class="h1">Painel da Operação</div>
+
+  <div class="grid3" id="cards-etapa"></div>
+
+  <div id="detalhe-etapa" style="display:none;margin-top:24px;">
+    <div class="card">
+      <div class="det-banner">
+        <div class="card-title" style="color:#fff;" id="detalhe-nome"></div>
+        <div style="text-align:right;">
+          <div style="font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;">Total</div>
+          <div class="mono" style="font-size:22px;font-weight:700;color:#fff;" id="detalhe-total"></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="sit-sub" style="margin-top:0;">Resumo consolidado</div>
+        <div id="detalhe-badges" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;"></div>
+        <button class="toggle-tabela" onclick="toggleDetalheTabela()" id="btn-toggle-tabela">▾ Mostrar casos detalhados</button>
+        <div id="detalhe-tabela-wrap" style="display:none;margin-top:12px;">
+          <table class="det-table">
+            <thead><tr>
+              <th>Ticket</th><th>Cliente</th><th>Operação</th><th>Situação</th><th>Data</th><th>Há quantos dias</th>
+            </tr></thead>
+            <tbody id="detalhe-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="wrap" id="tab-ponto">
+  <div class="eyebrow">Ponto pessoal</div>
+  <div class="h1">Meu Ponto</div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="fg" style="grid-template-columns:1fr 1fr;">
+        <div><div class="stat-label">Entrada</div><div class="stat-val mono" id="meu-controle-entrada" style="font-size:20px;">—</div></div>
+        <div><div class="stat-label">Saída</div><div class="stat-val mono" id="meu-controle-saida" style="font-size:20px;">Em andamento</div></div>
+      </div>
+      <button class="btn" style="margin-top:14px;" onclick="abrirProvisaoManual()">📅 Provisionar horas da semana</button>
+    </div>
+  </div>
+
+  <div class="sit-sub">Meus pontos da semana</div>
+  <div class="card">
+    <div class="card-body">
+      <table class="det-table">
+        <thead><tr><th>Data</th><th>Entrada</th><th>Saída</th><th>Casos</th></tr></thead>
+        <tbody id="meu-ponto-semana-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div id="modal-provisao-manual" style="display:none;position:fixed;inset:0;background:rgba(15,30,61,.6);z-index:999;align-items:center;justify-content:center;">
+  <div class="card" style="width:100%;max-width:460px;margin:20px;">
+    <div class="card-head"><div class="card-title">PROVISIONAMENTO — PRÓXIMA SEMANA</div></div>
+    <div class="card-body">
+      <div id="provisao-manual-dias" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;"></div>
+      <button class="btn" id="btn-salvar-provisao-manual" onclick="salvarProvisaoManual()">Salvar provisionamento →</button>
+      <div class="fb" id="fb-provisao-manual" style="font-size:12px;font-weight:600;text-align:center;min-height:18px;margin-top:6px;"></div>
+      <button onclick="fecharProvisaoManual()" style="background:none;border:none;color:var(--muted);font-size:11px;text-decoration:underline;cursor:pointer;margin-top:8px;width:100%;">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap" id="tab-gestao" style="display:none;">
+  <div id="gestao-lock" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:260px;gap:14px;">
+    <div class="h1" style="margin-bottom:0;">🔒 Área restrita</div>
+    <div style="font-size:13px;color:var(--muted);">Digite a senha de acesso à Gestão</div>
+    <div style="display:flex;gap:10px;">
+      <input type="password" id="inp-senha-gestao" placeholder="Senha" style="padding:10px 14px;border:1px solid var(--line);border-radius:5px;font-size:14px;width:180px;" onkeydown="if(event.key==='Enter') verificarSenhaGestao()">
+      <button class="btn" style="width:auto;padding:10px 20px;margin-top:0;" onclick="verificarSenhaGestao()">Entrar</button>
+    </div>
+    <div id="senha-gestao-erro" style="font-size:12px;color:var(--rose);font-weight:600;min-height:16px;"></div>
+  </div>
+
+  <div id="gestao-content" style="display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <div>
+        <div class="eyebrow" style="margin-top:0;">Área restrita</div>
+        <div class="h1" style="margin-bottom:0;">Painel de Gestão</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button onclick="zerarLegado()" style="background:none;border:1px solid var(--amber);color:var(--amber);font-size:11px;font-weight:700;padding:8px 16px;border-radius:5px;cursor:pointer;white-space:nowrap;">🗑 Zerar só o legado</button>
+        <button onclick="zerarDadosTeste()" style="background:none;border:1px solid var(--rose);color:var(--rose);font-size:11px;font-weight:700;padding:8px 16px;border-radius:5px;cursor:pointer;white-space:nowrap;">🗑 Zerar dados de teste</button>
+      </div>
+    </div>
+
+    <div class="tabs" id="tabs-gestao" style="background:transparent;border-bottom:2px solid var(--line);padding:0;margin-bottom:20px;">
+      <button class="tab on" onclick="trocarGestaoSub('equipe', this)">Equipe</button>
+      <button class="tab" onclick="trocarGestaoSub('mes', this)">Mês</button>
+      <button class="tab" onclick="trocarGestaoSub('historico', this)">Histórico</button>
+      <button class="tab" onclick="trocarGestaoSub('tme', this)">TME / SLA</button>
+      <button class="tab" onclick="trocarGestaoSub('fila', this)">Controle de Fila</button>
+      <button class="tab" onclick="trocarGestaoSub('rentabilidade', this)">Rentabilidade</button>
+      <button class="tab" onclick="trocarGestaoSub('programacao', this)">Provisionamento</button>
+    </div>
+
+    <!-- MÊS -->
+    <div id="gestao-sub-mes" style="display:none;">
+      <div class="sit-sub" style="margin-top:0;">Visão geral do mês</div>
+      <div class="grid3">
+        <div class="stat-card"><div class="stat-label">Total produzido</div><div class="stat-val accent" id="mes-total">0</div><div style="font-size:11px;color:var(--muted);margin-top:4px;" id="mes-dias-registro">0 dias com registros</div></div>
+        <div class="stat-card"><div class="stat-label">Média diária</div><div class="stat-val" id="mes-media">0</div><div style="font-size:11px;color:var(--muted);margin-top:4px;">casos por dia</div></div>
+        <div class="stat-card"><div class="stat-label">Dias restantes</div><div class="stat-val" id="mes-dias-restantes">0</div><div style="font-size:11px;color:var(--muted);margin-top:4px;" id="mes-dias-total">de 31 dias no mês</div></div>
+      </div>
+
+      <div class="sit-sub">Desempenho por esteira</div>
+      <div id="mes-esteiras"></div>
+
+      <div class="sit-sub">Desempenho semanal</div>
+      <div id="mes-semanas"></div>
+
+      <div class="note">Cada lançamento conta pra esse total — inclusive reanálises e casos que voltaram numa etapa, já que o objetivo aqui é medir volume de produção, não casos únicos.</div>
+    </div>
+
+    <!-- HISTÓRICO -->
+    <div id="gestao-sub-historico" style="display:none;">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">IMPORTAR BASE LEGADO</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button onclick="zerarLegado()" style="background:none;border:1px solid var(--rose);color:var(--rose);font-size:11px;font-weight:700;padding:6px 12px;border-radius:5px;cursor:pointer;white-space:nowrap;">🗑 Zerar apenas legado</button>
+            <label class="toggle-tabela" style="cursor:pointer;">📤 Importar planilha
+              <input type="file" id="inp-importar-legado" accept=".xlsx,.xls,.csv" style="display:none;" onchange="importarLegado(event)">
+            </label>
+          </div>
+        </div>
+        <div class="card-body">
+          <div style="font-size:12px;color:var(--muted);">A primeira coluna da planilha vira o Ticket (não precisa se chamar "Ticket"), e uma coluna chamada algo como <b>Data de Criação</b> (com ou sem acento, maiúscula ou minúscula) vira a data em que o caso entrou na Viabilidade — inclusive com hora junto, tipo "05/05/2026 17:11". As demais etapas já conseguem puxar pelo ticket normalmente.</div>
+          <div id="legado-resultado" style="font-size:12px;font-weight:600;margin-top:8px;"></div>
+        </div>
+      </div>
+
+      <div class="sit-sub" style="margin-top:0;">Editar caso</div>
+      <div class="card">
+        <div class="card-body">
+          <div class="fg" style="grid-template-columns:1fr auto;align-items:end;">
+            <div class="field ticket"><label>Ticket</label><input type="text" id="inp-editar-ticket" placeholder="TCK-000000"></div>
+            <button class="btn" style="width:auto;padding:9px 18px;margin-top:0;" onclick="buscarCasoEditar()">Buscar</button>
+          </div>
+          <div id="editar-nao-encontrado" style="display:none;font-size:12px;color:var(--rose);font-weight:600;margin-top:8px;">Ticket não encontrado na memória.</div>
+          <div id="editar-campos" style="display:none;margin-top:14px;">
+            <div class="fg">
+              <div class="field"><label>Tipo de operação</label>
+                <select id="edit-operacao">
+                  <option value="">— selecione —</option>
+                  <option>Aquisição com IQ</option>
+                  <option>Aquisição com FGTS</option>
+                  <option>Aquisição com IQ/FGTS</option>
+                  <option>Aquisição Simples</option>
+                  <option>Quitação de Financiamento Próprio</option>
+                  <option>Reforma/Construção/Ampliação</option>
+                  <option>Construção em Terreno Próprio com FGTS</option>
+                  <option>Rural</option>
+                  <option>Imóvel na Planta</option>
+                </select>
+              </div>
+              <div class="field"><label>Data de entrada</label><input type="date" id="edit-data-entrada"></div>
+            </div>
+            <div class="field" style="margin-bottom:14px;"><label>Tipo de bem</label>
+              <select id="edit-tipo-bem">
+                <option value="">— selecione —</option>
+                <option>Imóvel</option>
+                <option>Apartamento</option>
+                <option>Terreno</option>
+                <option>Comercial</option>
+              </select>
+            </div>
+            <div class="fg" id="editar-campo-vendedor" style="display:none;">
+              <div class="field"><label>Tipo de vendedor</label>
+                <select id="edit-tipo-vendedor">
+                  <option value="">— selecione —</option>
+                  <option>PF</option>
+                  <option>PJ</option>
+                </select>
+              </div>
+              <div class="field"><label>Quantidade de vendedores</label><input type="number" id="edit-qtd-vendedores" min="1"></div>
+            </div>
+            <button class="btn" onclick="salvarEdicaoCaso()">Salvar alterações →</button>
+            <button onclick="excluirCasoEditado()" style="width:100%;margin-top:8px;background:none;border:1px solid var(--rose);color:var(--rose);font-size:12px;font-weight:700;padding:10px;border-radius:5px;cursor:pointer;">🗑 Excluir este caso (era teste)</button>
+            <div class="fb" id="fb-editar" style="font-size:12px;font-weight:600;text-align:center;min-height:18px;margin-top:6px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sit-sub">Visão micro</div>
+      <div class="grid3">
+        <div class="stat-card"><div class="stat-label">Entrada (Viabilidade)</div><div class="stat-val accent" id="hist-entrada">0</div></div>
+        <div class="stat-card"><div class="stat-label">Saída (SEDEX)</div><div class="stat-val" id="hist-saida">0</div></div>
+        <div class="stat-card"><div class="stat-label">Saldo em fila</div><div class="stat-val" id="hist-saldo">0</div></div>
+      </div>
+
+      <div class="card" style="margin-top:20px;">
+        <div class="card-head">
+          <div class="card-title">FILTROS</div>
+          <button class="toggle-tabela" onclick="exportarHistorico()" style="color:var(--green);">📥 Exportar Excel</button>
+        </div>
+        <div class="card-body">
+          <div class="fg" style="grid-template-columns:1fr 1fr 1fr;">
+            <div class="field"><label>Período</label>
+              <select id="hist-periodo" onchange="renderHistorico()">
+                <option value="dia">Dia</option>
+                <option value="semana">Semana</option>
+                <option value="mes">Mês</option>
+                <option value="todos">Todos</option>
+              </select>
+            </div>
+            <div class="field"><label>Etapa</label>
+              <select id="hist-filtro-etapa" onchange="renderHistorico()">
+                <option value="">Todas</option>
+                <option>Viabilidade</option><option>Vistoria</option><option>Tarifas</option><option>Conformidade</option>
+                <option>Validação</option><option>Emissão</option><option>Atendimento</option>
+              </select>
+            </div>
+            <div class="field"><label>Analista</label>
+              <select id="hist-filtro-analista" onchange="renderHistorico()">
+                <option value="">Todos</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:20px;">
+        <div class="card-body">
+          <table class="det-table">
+            <thead><tr><th>Analista</th><th>Ticket</th><th>Etapa</th><th>Situação</th><th>Horário de lançamento</th></tr></thead>
+            <tbody id="hist-tbody"></tbody>
+          </table>
+          <div id="hist-vazio" style="display:none;font-size:12px;color:var(--muted);font-style:italic;padding:20px 0;text-align:center;">Nenhum lançamento no período/filtro selecionado.</div>
+        </div>
+      </div>
+
+      <div class="note">Entrada conta lançamentos na Viabilidade; Saída conta envios registrados no SEDEX.</div>
+    </div>
+
+    <!-- EQUIPE -->
+    <div id="gestao-sub-equipe">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">COLABORADORES</div>
+          <div style="display:flex;gap:8px;">
+            <label class="toggle-tabela" style="cursor:pointer;">📤 Importar planilha
+              <input type="file" id="inp-importar-equipe" accept=".xlsx,.xls,.csv" style="display:none;" onchange="importarEquipe(event)">
+            </label>
+            <button class="toggle-tabela" style="color:var(--green);" onclick="exportarEquipe()">📥 Exportar planilha</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="fg" style="grid-template-columns:1fr 1fr auto;align-items:end;">
+            <div class="field"><label>Nome do colaborador</label><input type="text" placeholder="Nome completo" id="novo-analista" onkeydown="if(event.key==='Enter') addAnalista()"></div>
+            <div class="field"><label>Fila de atuação</label>
+              <select id="nova-fila-analista">
+                <option value="">— sem fila definida —</option>
+                <option>Viabilidade</option><option>Vistoria</option><option>Tarifas</option><option>Conformidade</option>
+                <option>Validação</option><option>Emissão</option><option>Atendimento</option><option>SEDEX</option>
+                <option>Outro painel</option>
+              </select>
+            </div>
+            <button class="btn" id="btn-salvar-analista" style="width:auto;padding:9px 18px;margin-top:0;" onclick="addAnalista()">+ Adicionar</button>
+          </div>
+          <div id="editando-analista-aviso" style="display:none;font-size:11px;color:var(--accent);margin-top:6px;">Editando <b id="editando-analista-nome"></b> — mude a fila e clique em Salvar. <a onclick="cancelarEdicaoAnalista()" style="cursor:pointer;text-decoration:underline;">Cancelar</a></div>
+          <div id="lista-analistas-gestao" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;"></div>
+        </div>
+      </div>
+      <div class="note">Essa lista alimenta direto o campo "Você é" na aba Lançar Caso — adicionar, remover ou importar aqui já reflete lá. A planilha de importação precisa ter as colunas <b>Nome</b> e <b>Fila</b> (nessa ordem ou com esse cabeçalho) — quem já existe na lista é atualizado, não duplicado.</div>
+    </div>
+
+    <!-- TME / SLA -->
+    <div id="gestao-sub-tme" style="display:none;">
+      <div class="grid3" id="tme-cards"></div>
+      <div class="note">Tempo médio calculado pelo intervalo entre o lançamento de um ticket numa etapa e o lançamento seguinte do mesmo ticket (em qualquer etapa). Ainda falta você confirmar o critério de contagem (corrido x horário comercial) e o prazo-alvo do SLA por etapa.</div>
+    </div>
+
+    <!-- CONTROLE DE FILA -->
+    <div id="gestao-sub-fila" style="display:none;">
+      <div class="grid3">
+        <div class="stat-card"><div class="stat-label">Entrada (Viabilidade)</div><div class="stat-val accent" id="fila-entrada">0</div></div>
+        <div class="stat-card"><div class="stat-label">Saída (SEDEX)</div><div class="stat-val" id="fila-saida">0</div></div>
+        <div class="stat-card"><div class="stat-label">Saldo em fila</div><div class="stat-val" id="fila-saldo">0</div></div>
+      </div>
+
+      <div class="sit-sub" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Casos novos por dia (mês)</span>
+        <span style="font-size:11px;font-weight:700;color:var(--accent);text-transform:none;letter-spacing:0;">Total no mês: <span class="mono" id="fila-total-mes">0</span></span>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <table class="det-table">
+            <thead><tr><th>Data</th><th>Casos novos</th></tr></thead>
+            <tbody id="fila-por-dia-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- RENTABILIDADE -->
+    <div id="gestao-sub-rentabilidade" style="display:none;">
+      <div class="card">
+        <div class="card-head"><div class="card-title">PARÂMETROS</div></div>
+        <div class="card-body">
+          <div class="field"><label>Volume normal por dia (por esteira)</label>
+            <input type="number" id="rent-volume-normal" value="15" min="1" oninput="renderRentabilidade()">
+          </div>
+          <div style="font-size:11px;color:var(--muted);">Capacidade considerada: 2 casos/hora por analista. Ajuste o volume normal acima — os cards abaixo recalculam o excedente na hora.</div>
+        </div>
+      </div>
+
+      <div class="sit-sub">Volumetria por esteira hoje</div>
+      <div id="rent-esteiras"></div>
+
+      <div class="note">Marque Rentável ou Não rentável em cada esteira olhando o excedente do dia — essa decisão fica registrada aqui pra você acompanhar o histórico de quando valeu a pena reforçar com provisionamento.</div>
+    </div>
+
+    <!-- PROGRAMAÇÃO HE -->
+    <div id="gestao-sub-programacao" style="display:none;">
+      <div class="sit-sub" style="margin-top:0;">Solicitações de correção</div>
+      <div class="card">
+        <div class="card-body">
+          <table class="det-table">
+            <thead><tr><th>Analista</th><th>Saída registrada</th><th>Solicitado em</th><th></th></tr></thead>
+            <tbody id="correcao-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="sit-sub" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <span>Histórico de ponto</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <input type="date" id="ponto-hist-data" onchange="renderProgramacaoHE()" style="font-size:12px;padding:6px 10px;border:1px solid var(--line);border-radius:5px;">
+          <a onclick="document.getElementById('ponto-hist-data').value='';renderProgramacaoHE();" style="font-size:11px;color:var(--muted);text-decoration:underline;cursor:pointer;">Ver tudo</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <table class="det-table">
+            <thead><tr><th>Analista</th><th>Entrada</th><th>Saída</th><th>Casos no dia</th></tr></thead>
+            <tbody id="ponto-historico-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="sit-sub">Provisionamento próxima semana</div>
+      <div class="card">
+        <div class="card-body" style="overflow-x:auto;">
+          <table class="det-table">
+            <thead><tr><th>Analista</th><th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th><th>Sáb</th><th>Total</th><th></th></tr></thead>
+            <tbody id="provisao-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="note">Toda sexta-feira, ao se identificar na tela de entrada, o analista é convidado a provisionar a semana seguinte (segunda a sábado — não fazemos provisionamento aos domingos). Limite de 2h por dia de semana e 6h no sábado, com aviso quando estourar.</div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+var API_BASE = 'http://191.252.227.145:8083';
+
+function atualizarRelogioCabecalho(){
+  var d = new Date();
+  var dias = ['DOM','SEG','TER','QUA','QUI','SEX','SÁB'];
+  var meses = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  var pad = function(n){ return String(n).padStart(2,'0'); };
+  var el = document.getElementById('relogio-cabecalho');
+  if (el) el.textContent = dias[d.getDay()] + ' · ' + pad(d.getDate()) + ' ' + meses[d.getMonth()] + ' ' + d.getFullYear() + ' · ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+atualizarRelogioCabecalho();
+document.getElementById('ponto-hist-data').value = hojeISO();
+setInterval(atualizarRelogioCabecalho, 15000);
+
+async function apiGet(path){
+  var r = await fetch(API_BASE + path);
+  if (!r.ok) { var err = new Error('erro'); err.status = r.status; try { err.body = await r.json(); } catch(_){} throw err; }
+  return r.json();
+}
+async function apiPost(path, body){
+  var r = await fetch(API_BASE + path, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body||{}) });
+  if (!r.ok) { var err = new Error('erro'); err.status = r.status; try { err.body = await r.json(); } catch(_){} throw err; }
+  return r.json();
+}
+async function apiPut(path, body){
+  var r = await fetch(API_BASE + path, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body||{}) });
+  if (!r.ok) { var err = new Error('erro'); err.status = r.status; throw err; }
+  return r.json();
+}
+async function apiDelete(path){
+  var r = await fetch(API_BASE + path, { method:'DELETE' });
+  if (!r.ok) { var err = new Error('erro'); err.status = r.status; throw err; }
+  return r.json();
+}
+
+async function sincronizarLancamentos(){
+  try {
+    var linhas = await apiGet('/api/lancamentos');
+    todosCasosHoje = linhas.map(function(l){
+      return {
+        ticket: l.ticket, etapa: l.etapa, analista: l.analista,
+        situacao: JSON.parse(l.situacao || '[]'),
+        tipoVendedor: l.tipo_vendedor, qtdVendedores: l.qtd_vendedores,
+        horario: l.horario, momento: new Date(l.momento)
+      };
+    });
+  } catch (e) { console.error('Falha ao sincronizar lançamentos', e); }
+}
+
+async function sincronizarSedex(){
+  try {
+    var linhas = await apiGet('/api/sedex');
+    sedexHoje = linhas.map(function(s){ return { ticket: s.ticket, data: s.data, rastreio: s.rastreio, tipo: s.tipo, horario: s.horario, momento: new Date(s.momento) }; });
+    sedexRegistros = {};
+    sedexHoje.forEach(function(s){ sedexRegistros[s.ticket] = { data: s.data, rastreio: s.rastreio, tipo: s.tipo }; });
+  } catch (e) { console.error('Falha ao sincronizar SEDEX', e); }
+}
+
+async function sincronizarCasosMemoria(){
+  try {
+    var linhas = await apiGet('/api/casos');
+    linhas.forEach(function(c){
+      casosMemoria[c.ticket] = {
+        analista: c.analista, nome: c.nome, operacao: c.operacao,
+        tipoBem: c.tipo_bem, fgts: c.fgts, dataLancamento: c.data_lancamento, dataEntrada: c.data_entrada
+      };
+    });
+  } catch (e) { console.error('Falha ao sincronizar memória de casos', e); }
+}
+
+function aplicarKind(btn){
+  btn.classList.remove('apr','pend','recus','neutro');
+  var kind = btn.getAttribute('data-kind');
+  if (kind) btn.classList.add(kind);
+}
+
+function ligarGrupo(group, exclusivo){
+  var multi = group.getAttribute('data-multi') === 'true';
+  group.querySelectorAll('.stamp').forEach(function(btn){
+    aplicarKind(btn);
+    btn.addEventListener('click', function(){
+      var label = btn.textContent;
+      if (exclusivo && exclusivo.indexOf(label) !== -1) {
+        group.querySelectorAll('.stamp').forEach(function(b){
+          if (b !== btn && exclusivo.indexOf(b.textContent) !== -1) b.classList.remove('sel');
+        });
+        btn.classList.toggle('sel');
+      } else if (multi) {
+        btn.classList.toggle('sel');
+      } else {
+        group.querySelectorAll('.stamp').forEach(function(b){ b.classList.remove('sel'); });
+        btn.classList.add('sel');
+      }
+    });
+  });
+}
+
+var ETAPAS = {
+  Viabilidade: { numero:1, extra:null, contato:true, dataEntrada:true, tipoBem:true, fgts:true,
+    situacao: [
+      { titulo:null, multi:true, exclusivo:['Aprovado','Pendente','Recusado'], opcoes:[['Aprovado','apr'],['Pendente','pend'],['Recusado','recus'],['BackOffice','neutro']] },
+      { titulo:'Tipo de análise', multi:false, opcoes:[['1ª análise','neutro'],['Reanálise','neutro'],['Reanálise 3ª','neutro']] }
+    ]},
+  Vistoria: { numero:2, contato:true, tarifas:true, dataEntrada:false,
+    extra:{ label:'Tipo', opcoes:['Solicitar vistoria','Contestação de laudo','Retificação de laudo','Análise de laudo','Confirmação de valores'] },
+    situacao: [
+      { titulo:null, multi:true, opcoes:[['Documento pendente','pend'],['Aprovado','apr'],['Reprovado','recus']] }
+    ]},
+  Tarifas: { numero:3, extra:null, contato:false, dataEntrada:false,
+    situacao: [
+      { titulo:null, multi:false, opcoes:[['Desconto','apr'],['Boleto','neutro']] }
+    ]},
+  Conformidade: { numero:4, extra:null, contato:true, tarifas:true, dataEntrada:false, vendedor:true,
+    situacao: [
+      { titulo:null, multi:true, exclusivo:['Aprovado','Pendente','Recusado'], opcoes:[['Aprovado','apr'],['Pendente','pend'],['Recusado','recus'],['BackOffice','neutro']] },
+      { titulo:'Tipo de análise', multi:false, opcoes:[['1ª análise','neutro'],['Reanálise','neutro'],['Reanálise 3ª','neutro']] }
+    ]},
+  Validação: { numero:5, extra:null, contato:true, tarifas:true, dataEntrada:false,
+    situacao: [
+      { titulo:null, multi:true, exclusivo:['Aprovado','Reprovado','Documento pendente'], opcoes:[['Aprovado','apr'],['Reprovado','recus'],['Documento pendente','pend'],['BackOffice','neutro']] }
+    ]},
+  Emissão: { numero:6, extra:null, contato:false, dataEntrada:false,
+    situacao: [
+      { titulo:null, multi:false, opcoes:[['Emitido','apr'],['Documento pendente','pend'],['Correção','recus'],['Reemissão','recus']] }
+    ]},
+  Atendimento: { numero:7, extra:null, contato:false, dataEntrada:false,
+    situacao: [
+      { titulo:'Contato ativo', multi:false, opcoes:[['Positivo','apr'],['Negativo','recus']] }
+    ]},
+  SEDEX: { numero:null, isSedex:true, extra:null, contato:false, tarifas:false, dataEntrada:false, situacao:[] }
+};
+
+function renderCamposEtapa(etapa){
+  var cfg = ETAPAS[etapa];
+
+  var extraCampo = document.getElementById('campo-extra');
+  if (cfg.extra){
+    extraCampo.style.display = '';
+    document.getElementById('extra-label').innerHTML = cfg.extra.label + ' <span class="req">*</span>';
+    var sel = document.getElementById('sel-extra');
+    sel.innerHTML = '<option value="">— selecione —</option>' + cfg.extra.opcoes.map(function(o){ return '<option>'+o+'</option>'; }).join('');
+  } else {
+    extraCampo.style.display = 'none';
+  }
+
+  var cont = document.getElementById('situacao-container');
+  cont.innerHTML = '';
+  cfg.situacao.forEach(function(grupo, i){
+    if (grupo.titulo){
+      var sub = document.createElement('div');
+      sub.className = 'sit-sub';
+      sub.textContent = grupo.titulo;
+      cont.appendChild(sub);
+    }
+    var div = document.createElement('div');
+    div.className = 'sit-group';
+    div.setAttribute('data-multi', grupo.multi ? 'true' : 'false');
+    div.id = 'grupo-sit-' + i;
+    grupo.opcoes.forEach(function(op, j){
+      var btn = document.createElement('button');
+      btn.className = 'stamp';
+      btn.setAttribute('data-kind', op[1]);
+      btn.textContent = op[0];
+      div.appendChild(btn);
+    });
+    cont.appendChild(div);
+    ligarGrupo(div, grupo.exclusivo);
+  });
+
+  document.getElementById('campo-contato').style.display = cfg.contato ? '' : 'none';
+  document.getElementById('campo-tarifas').style.display = cfg.tarifas ? '' : 'none';
+  document.getElementById('campo-data-entrada').style.display = cfg.dataEntrada ? '' : 'none';
+  var inpDataEntrada = document.getElementById('inp-data-entrada');
+  if (cfg.dataEntrada && !inpDataEntrada.value && !inpDataEntrada.hasAttribute('readonly')) {
+    inpDataEntrada.value = hojeISO();
+  }
+  document.getElementById('campo-tipo-bem').style.display = cfg.tipoBem ? '' : 'none';
+  document.getElementById('campo-fgts').style.display = cfg.fgts ? '' : 'none';
+  document.getElementById('campo-vendedor').style.display = cfg.vendedor ? '' : 'none';
+
+  document.getElementById('campo-situacao').style.display = cfg.isSedex ? 'none' : '';
+  document.getElementById('btn-registrar-caso').style.display = cfg.isSedex ? 'none' : '';
+}
+
+var casosMemoria = {};
+
+function trocarEtapa(){
+  var etapa = document.getElementById('sel-etapa').value;
+  var cfg = ETAPAS[etapa];
+  document.getElementById('titulo-etapa').textContent = cfg.isSedex ? 'SEDEX · ENVIO AO CLIENTE' : ('ETAPA ' + cfg.numero + ' · ' + etapa.toUpperCase());
+  renderCamposEtapa(etapa);
+  checarMemoria();
+  checarSedex();
+  document.getElementById('banner-novo-caso').style.display = 'none';
+}
+trocarEtapa();
+document.querySelectorAll('#grupo-contato .stamp').forEach(aplicarKind);
+document.getElementById('grupo-contato').setAttribute('data-multi','false');
+ligarGrupo(document.getElementById('grupo-contato'));
+document.querySelectorAll('#grupo-tarifas .stamp').forEach(aplicarKind);
+document.getElementById('grupo-tarifas').setAttribute('data-multi','false');
+ligarGrupo(document.getElementById('grupo-tarifas'));
+document.querySelectorAll('#grupo-fgts .stamp').forEach(aplicarKind);
+document.getElementById('grupo-fgts').setAttribute('data-multi','false');
+ligarGrupo(document.getElementById('grupo-fgts'));
+document.querySelectorAll('#grupo-fgts .stamp').forEach(function(btn){
+  btn.addEventListener('click', function(){ atualizarAlertaFgts(btn.textContent); });
+});
+
+function horaAgora(){
+  var d = new Date();
+  var pad = function(n){ return String(n).padStart(2,'0'); };
+  return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes());
+}
+document.getElementById('ts-lancamento').textContent = horaAgora();
+
+var todosCasosHoje = [];
+document.getElementById('sel-analista').addEventListener('change', atualizarResumo);
+
+function atualizarAlertaFgts(valor){
+  var el = document.getElementById('alerta-fgts');
+  if (valor === 'Sim') {
+    el.style.display = '';
+    el.style.background = 'var(--amber-soft)';
+    el.style.border = '1.5px solid var(--amber)';
+    el.style.color = 'var(--amber)';
+    el.textContent = '⚠ FGTS — Registro físico';
+  } else if (valor === 'Não') {
+    el.style.display = '';
+    el.style.background = 'var(--accent-soft)';
+    el.style.border = '1.5px solid var(--accent)';
+    el.style.color = 'var(--accent)';
+    el.textContent = '💻 Sem FGTS — Registro digital';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+async function checarMemoria(){
+  var etapa = document.getElementById('sel-etapa').value;
+  var ticket = document.getElementById('inp-ticket').value.trim();
+  var badge = document.getElementById('memoria-badge');
+  var nomeInput = document.getElementById('inp-nome');
+  var opSel = document.getElementById('sel-operacao');
+  var bemSel = document.getElementById('sel-tipo-bem');
+  var dataEntradaInput = document.getElementById('inp-data-entrada');
+
+  if (!ticket) {
+    badge.style.display = 'none';
+    nomeInput.removeAttribute('readonly');
+    opSel.removeAttribute('disabled');
+    opSel.removeAttribute('data-pendente-legado');
+    bemSel.removeAttribute('disabled');
+    dataEntradaInput.removeAttribute('readonly');
+    if (etapa !== 'Viabilidade') atualizarAlertaFgts(null);
+    return;
+  }
+
+  var resultado = null;
+  try { resultado = await apiGet('/api/casos/' + encodeURIComponent(ticket)); } catch (e) { resultado = null; }
+  if (document.getElementById('inp-ticket').value.trim() !== ticket) return;
+
+  if (resultado && resultado.encontrado) {
+    var c = {
+      analista: resultado.caso.analista, nome: resultado.caso.nome, operacao: resultado.caso.operacao,
+      tipoBem: resultado.caso.tipo_bem, fgts: resultado.caso.fgts,
+      dataLancamento: resultado.caso.data_lancamento, dataEntrada: resultado.caso.data_entrada
+    };
+    casosMemoria[ticket] = c;
+    badge.style.display = 'grid';
+    document.getElementById('memoria-txt').textContent = 'aberto por ' + c.analista + ' em ' + c.dataLancamento;
+    if (c.nome) {
+      nomeInput.value = c.nome;
+      nomeInput.setAttribute('readonly','readonly');
+    } else {
+      nomeInput.value = '';
+      nomeInput.removeAttribute('readonly');
+    }
+    if (c.operacao) {
+      opSel.value = c.operacao;
+      opSel.setAttribute('disabled','disabled');
+    } else {
+      opSel.value = '';
+      opSel.removeAttribute('disabled');
+      opSel.setAttribute('data-pendente-legado', ticket);
+    }
+    if (c.tipoBem) {
+      bemSel.value = c.tipoBem;
+      bemSel.setAttribute('disabled','disabled');
+    } else {
+      bemSel.value = '';
+      bemSel.removeAttribute('disabled');
+    }
+    if (etapa === 'Viabilidade') {
+      dataEntradaInput.value = c.dataEntrada;
+      dataEntradaInput.setAttribute('readonly','readonly');
+    }
+    atualizarAlertaFgts(c.fgts);
+  } else {
+    delete casosMemoria[ticket];
+    badge.style.display = 'none';
+    nomeInput.removeAttribute('readonly');
+    opSel.removeAttribute('disabled');
+    opSel.removeAttribute('data-pendente-legado');
+    bemSel.removeAttribute('disabled');
+    dataEntradaInput.removeAttribute('readonly');
+    if (etapa !== 'Viabilidade') atualizarAlertaFgts(null);
+  }
+}
+
+async function atualizarResumo(){
+  await sincronizarLancamentos();
+  var analistaAtual = document.getElementById('sel-analista').value;
+  var casosHoje = todosCasosHoje.filter(function(c){ return ehHoje(c.momento); });
+  var meus = casosHoje.filter(function(c){ return c.analista === analistaAtual; });
+
+  document.getElementById('stat-equipe').textContent = casosHoje.length;
+  document.getElementById('stat-meu').textContent = meus.length;
+  document.getElementById('contador-novos').textContent = casosHoje.filter(function(c){ return c.etapa === 'Viabilidade'; }).length;
+
+  var tempoEl = document.getElementById('stat-tempo');
+  if (meus.length < 2) {
+    tempoEl.textContent = '—';
+  } else {
+    var ordenados = meus.slice().sort(function(a,b){ return a.momento - b.momento; });
+    var totalMin = 0;
+    for (var i=1; i<ordenados.length; i++){ totalMin += (ordenados[i].momento - ordenados[i-1].momento) / 60000; }
+    tempoEl.textContent = Math.round(totalMin / (ordenados.length - 1)) + 'min';
+  }
+
+  var lista = document.getElementById('lista-casos');
+  if (!analistaAtual) {
+    lista.innerHTML = '<div style="font-size:12px;color:var(--muted);font-style:italic;">Selecione seu nome e registre um caso pra ver aqui.</div>';
+    return;
+  }
+  if (meus.length === 0) {
+    lista.innerHTML = '<div style="font-size:12px;color:var(--muted);font-style:italic;">Nenhum caso seu lançado hoje ainda.</div>';
+    return;
+  }
+  lista.innerHTML = '';
+  meus.slice().sort(function(a,b){ return b.momento - a.momento; }).forEach(function(c){
+    var row = document.createElement('div');
+    row.className = 'caso-row';
+    row.innerHTML = '<span class="et">'+c.etapa+'</span><span class="tk">'+c.ticket+'</span><span class="an">'+c.situacao.join(', ')+'</span><span class="ts">'+c.horario+'</span>';
+    lista.appendChild(row);
+  });
+}
+atualizarResumo();
+
+var ETAPA_ORDEM = ['Viabilidade','Vistoria','Tarifas','Conformidade','Validação','Emissão','Atendimento'];
+var etapaAberta = null;
+
+async function trocarTab(tab, btn){
+  document.getElementById('tab-lancar').style.display = (tab === 'lancar') ? '' : 'none';
+  document.getElementById('tab-painel').style.display = (tab === 'painel') ? '' : 'none';
+  document.getElementById('tab-ponto').style.display = (tab === 'ponto') ? '' : 'none';
+  document.getElementById('tab-gestao').style.display = (tab === 'gestao') ? '' : 'none';
+  document.querySelectorAll('#tabs-principal .tab').forEach(function(b){ b.classList.remove('on'); });
+  if (btn) btn.classList.add('on');
+  if (tab === 'painel') { await sincronizarLancamentos(); await sincronizarSedex(); await sincronizarCasosMemoria(); renderCardsEtapa(); document.getElementById('detalhe-etapa').style.display = 'none'; etapaAberta = null; }
+  if (tab === 'ponto') atualizarMeuControle();
+  if (tab === 'gestao' && document.getElementById('gestao-content').style.display !== 'none') renderGestaoAtual();
+}
+
+function calcularFilaAtual(){
+  var ultimoPorTicket = {};
+  todosCasosHoje.forEach(function(c){
+    if (!ultimoPorTicket[c.ticket] || c.momento > ultimoPorTicket[c.ticket].momento) {
+      ultimoPorTicket[c.ticket] = c;
+    }
+  });
+  var concluidos = {};
+  sedexHoje.forEach(function(s){ concluidos[s.ticket] = true; });
+
+  var porEtapa = {};
+  ETAPA_ORDEM.forEach(function(e){ porEtapa[e] = []; });
+  Object.keys(ultimoPorTicket).forEach(function(ticket){
+    if (concluidos[ticket]) return;
+    var c = ultimoPorTicket[ticket];
+    if (porEtapa.hasOwnProperty(c.etapa)) porEtapa[c.etapa].push(c);
+  });
+  return porEtapa;
+}
+
+function diasEmAberto(momento){
+  var ms = new Date().setHours(0,0,0,0) - new Date(momento).setHours(0,0,0,0);
+  return Math.round(ms / 86400000);
+}
+
+function renderCardsEtapa(){
+  var filaAtual = calcularFilaAtual();
+  var cont = document.getElementById('cards-etapa');
+  cont.innerHTML = '';
+  ETAPA_ORDEM.forEach(function(etapa, i){
+    var emFila = filaAtual[etapa].length;
+    var novosHoje = filaAtual[etapa].filter(function(c){ return ehHoje(c.momento); }).length;
+    var btn = document.createElement('button');
+    btn.className = 'etapa-card' + (etapaAberta === etapa ? ' on' : '');
+    btn.innerHTML = '<div class="stat-label">ETAPA '+(i+1)+' · '+etapa.toUpperCase()+'</div><div class="stat-val accent">'+emFila+'</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">'+novosHoje+' novo'+(novosHoje===1?'':'s')+' hoje</div>';
+    btn.onclick = function(){ abrirDetalheEtapa(etapa); };
+    cont.appendChild(btn);
+  });
+  var btnSedex = document.createElement('button');
+  btnSedex.className = 'etapa-card' + (etapaAberta === 'SEDEX' ? ' on' : '');
+  var sedexHojeQtd = sedexHoje.filter(function(s){ return ehHoje(s.momento); }).length;
+  btnSedex.innerHTML = '<div class="stat-label">SEDEX · ENVIOS HOJE</div><div class="stat-val accent">'+sedexHojeQtd+'</div>';
+  btnSedex.onclick = function(){ abrirDetalheEtapa('SEDEX'); };
+  cont.appendChild(btnSedex);
+}
+
+function abrirDetalheEtapa(etapa){
+  etapaAberta = etapa;
+  renderCardsEtapa();
+
+  if (etapa === 'SEDEX') {
+    var envios = sedexHoje.filter(function(s){ return ehHoje(s.momento); }).sort(function(a,b){ return b.momento - a.momento; });
+    document.getElementById('detalhe-etapa').style.display = '';
+    document.getElementById('detalhe-nome').textContent = 'SEDEX · ENVIOS DE HOJE';
+    document.getElementById('detalhe-total').textContent = envios.length;
+
+    var badgesS = document.getElementById('detalhe-badges');
+    badgesS.innerHTML = envios.length === 0
+      ? '<span style="font-size:12px;color:var(--muted);font-style:italic;">Nenhum envio registrado hoje.</span>'
+      : '<span class="badge-sit">' + envios.length + ' envio' + (envios.length === 1 ? '' : 's') + ' registrado' + (envios.length === 1 ? '' : 's') + '</span>';
+
+    var tbodyS = document.getElementById('detalhe-tbody');
+    tbodyS.innerHTML = '';
+    envios.forEach(function(s){
+      var mem = casosMemoria[s.ticket];
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td>'+s.ticket+'</td><td>'+(mem ? mem.nome : '—')+'</td><td>'+(mem ? mem.operacao : '—')+'</td><td>Rastreio: '+s.rastreio+'</td><td>'+s.data+'</td><td>—</td>';
+      tbodyS.appendChild(tr);
+    });
+
+    document.getElementById('detalhe-tabela-wrap').style.display = 'none';
+    document.getElementById('btn-toggle-tabela').textContent = '▾ Mostrar envios detalhados (' + envios.length + ')';
+    return;
+  }
+
+  // Fila atual: o lançamento mais recente de cada ticket que hoje está parado nessa etapa
+  // (inclui casos antigos/legado que ainda não avançaram, não só o que entrou hoje)
+  var casos = calcularFilaAtual()[etapa].sort(function(a,b){ return a.momento - b.momento; });
+
+  document.getElementById('detalhe-etapa').style.display = '';
+  document.getElementById('detalhe-nome').textContent = etapa.toUpperCase() + ' · FILA ATUAL';
+  document.getElementById('detalhe-total').textContent = casos.length;
+
+  var contagem = {};
+  casos.forEach(function(c){
+    c.situacao.forEach(function(label){ contagem[label] = (contagem[label] || 0) + 1; });
+  });
+  var badges = document.getElementById('detalhe-badges');
+  badges.innerHTML = '';
+  if (Object.keys(contagem).length === 0) {
+    badges.innerHTML = '<span style="font-size:12px;color:var(--muted);font-style:italic;">Nenhum caso parado nessa etapa agora.</span>';
+  } else {
+    Object.keys(contagem).forEach(function(label){
+      var pill = document.createElement('span');
+      pill.className = 'badge-sit';
+      pill.textContent = contagem[label] + ' ' + label;
+      badges.appendChild(pill);
+    });
+  }
+
+  var tbody = document.getElementById('detalhe-tbody');
+  tbody.innerHTML = '';
+  casos.forEach(function(c){
+    var mem = casosMemoria[c.ticket];
+    var dias = diasEmAberto(c.momento);
+    var tr = document.createElement('tr');
+    var diasTexto = dias === 0 ? 'hoje' : (dias + (dias === 1 ? ' dia' : ' dias'));
+    tr.innerHTML = '<td>'+c.ticket+'</td><td>'+(mem ? mem.nome : '—')+'</td><td>'+(mem ? mem.operacao : '—')+'</td><td>'+c.situacao.join(', ')+'</td><td>'+c.horario.split(' ')[0]+'</td><td>'+diasTexto+'</td>';
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('detalhe-tabela-wrap').style.display = 'none';
+  document.getElementById('btn-toggle-tabela').textContent = '▾ Mostrar casos detalhados (' + casos.length + ')';
+}
+
+function toggleDetalheTabela(){
+  var wrap = document.getElementById('detalhe-tabela-wrap');
+  var btn = document.getElementById('btn-toggle-tabela');
+  var aberto = wrap.style.display !== 'none';
+  wrap.style.display = aberto ? 'none' : '';
+  var n = document.getElementById('detalhe-tbody').children.length;
+  btn.textContent = (aberto ? '▾ Mostrar' : '▴ Ocultar') + ' casos detalhados (' + n + ')';
+}
+
+async function registrarCaso(){
+  var fb = document.getElementById('fb-registro');
+  var analista = document.getElementById('sel-analista').value;
+  var etapa = document.getElementById('sel-etapa').value;
+  var cfg = ETAPAS[etapa];
+  var ticket = document.getElementById('inp-ticket').value.trim();
+  var operacao = document.getElementById('sel-operacao').value;
+  var tipoBem = document.getElementById('sel-tipo-bem').value;
+  var fgtsBtn = document.querySelector('#grupo-fgts .stamp.sel');
+  var tipoVendedor = document.getElementById('sel-tipo-vendedor').value;
+  var qtdVendedores = document.getElementById('inp-qtd-vendedores').value;
+  var situacaoSel = Array.from(document.querySelectorAll('#situacao-container .stamp.sel')).map(function(b){ return b.textContent; });
+  var contatoBtn = document.querySelector('#grupo-contato .stamp.sel');
+  var tarifasBtn = document.querySelector('#grupo-tarifas .stamp.sel');
+  var extraVal = cfg.extra ? document.getElementById('sel-extra').value : null;
+
+  if (!analista){ fb.textContent = 'Selecione seu nome antes de registrar.'; fb.style.color = 'var(--rose)'; return; }
+  if (!ticket){ fb.textContent = 'Informe o número do ticket.'; fb.style.color = 'var(--rose)'; return; }
+  if (etapa === 'Viabilidade' && !operacao){ fb.textContent = 'Selecione o tipo de operação.'; fb.style.color = 'var(--rose)'; return; }
+  if (etapa === 'Viabilidade' && !tipoBem){ fb.textContent = 'Selecione o tipo de bem.'; fb.style.color = 'var(--rose)'; return; }
+  if (cfg.fgts && !fgtsBtn){ fb.textContent = 'Informe se o caso tem FGTS.'; fb.style.color = 'var(--rose)'; return; }
+  if (cfg.vendedor && (!tipoVendedor || !qtdVendedores)){ fb.textContent = 'Informe o tipo e a quantidade de vendedores.'; fb.style.color = 'var(--rose)'; return; }
+  if (cfg.extra && !extraVal){ fb.textContent = 'Selecione o campo "'+cfg.extra.label+'".'; fb.style.color = 'var(--rose)'; return; }
+  if (situacaoSel.length === 0){ fb.textContent = 'Selecione ao menos uma opção em Situação.'; fb.style.color = 'var(--rose)'; return; }
+  if (cfg.contato && !contatoBtn){ fb.textContent = 'Informe se houve contato com o cliente.'; fb.style.color = 'var(--rose)'; return; }
+  if (cfg.tarifas && !tarifasBtn){ fb.textContent = 'Informe se as tarifas foram pagas.'; fb.style.color = 'var(--rose)'; return; }
+
+  var nome = document.getElementById('inp-nome').value.trim() || (casosMemoria[ticket] ? casosMemoria[ticket].nome : '');
+  var dataEntrada = casosMemoria[ticket] ? casosMemoria[ticket].dataEntrada : document.getElementById('inp-data-entrada').value;
+  var fgts = fgtsBtn ? fgtsBtn.textContent : (casosMemoria[ticket] ? casosMemoria[ticket].fgts : '');
+
+  var payload = {
+    ticket: ticket, etapa: etapa, analista: analista, situacao: situacaoSel,
+    operacao: operacao, tipoBem: tipoBem, fgts: fgts, dataEntrada: dataEntrada, nome: nome
+  };
+  if (cfg.vendedor) { payload.tipoVendedor = tipoVendedor; payload.qtdVendedores = qtdVendedores; }
+
+  var resposta;
+  try {
+    resposta = await apiPost('/api/lancamentos', payload);
+  } catch (e) {
+    if (e.status === 404) {
+      fb.textContent = 'Ticket não encontrado na memória — confira o número ou lance primeiro na Viabilidade.';
+    } else {
+      fb.textContent = 'Não consegui registrar — confira se o backend está acessível.';
+    }
+    fb.style.color = 'var(--rose)';
+    return;
+  }
+
+  var agora = resposta.horario || horaAgora();
+
+  fb.textContent = '✓ Caso '+ticket+' registrado na etapa '+etapa+'.';
+  fb.style.color = 'var(--green)';
+  document.getElementById('ts-lancamento').textContent = agora;
+
+  await atualizarResumo();
+
+  var banner = document.getElementById('banner-novo-caso');
+  if (etapa === 'Viabilidade') {
+    document.getElementById('banner-novo-total').textContent = document.getElementById('contador-novos').textContent;
+    banner.style.display = '';
+  } else {
+    banner.style.display = 'none';
+  }
+
+  document.getElementById('inp-ticket').value = '';
+  document.getElementById('inp-nome').value = '';
+  document.getElementById('inp-nome').removeAttribute('readonly');
+  document.getElementById('sel-operacao').value = '';
+  document.getElementById('sel-operacao').removeAttribute('disabled');
+  document.getElementById('sel-tipo-bem').value = '';
+  document.getElementById('sel-tipo-bem').removeAttribute('disabled');
+  document.getElementById('inp-data-entrada').removeAttribute('readonly');
+  document.getElementById('memoria-badge').style.display = 'none';
+  document.getElementById('alerta-fgts').style.display = 'none';
+  document.getElementById('sel-tipo-vendedor').value = '';
+  document.getElementById('inp-qtd-vendedores').value = '';
+  if (cfg.extra) document.getElementById('sel-extra').value = '';
+  document.querySelectorAll('#situacao-container .stamp, #grupo-contato .stamp, #grupo-tarifas .stamp, #grupo-fgts .stamp').forEach(function(b){ b.classList.remove('sel'); });
+  checarSedex();
+}
+
+var sedexRegistros = {};
+var sedexHoje = [];
+
+var tipoEnvioAtual = null;
+
+function trocarTipoEnvio(tipo){
+  tipoEnvioAtual = tipo;
+  document.querySelectorAll('#grupo-tipo-envio .stamp').forEach(function(b){ b.classList.remove('sel'); });
+  var btns = document.querySelectorAll('#grupo-tipo-envio .stamp');
+  (tipo === 'Físico' ? btns[0] : btns[1]).classList.add('sel');
+  document.getElementById('campo-sedex-rastreio').style.display = (tipo === 'Digital') ? 'none' : '';
+  if (tipo === 'Digital') document.getElementById('inp-sedex-rastreio').value = '';
+}
+
+async function checarSedex(){
+  var etapa = document.getElementById('sel-etapa').value;
+  var ticket = document.getElementById('inp-ticket').value.trim();
+  var campos = document.getElementById('sedex-campos');
+  var vazio = document.getElementById('sedex-vazio');
+
+  if (!ETAPAS[etapa].isSedex) {
+    campos.style.display = 'none';
+    vazio.style.display = 'none';
+    return;
+  }
+
+  if (!ticket) {
+    campos.style.display = 'none';
+    vazio.style.display = '';
+    vazio.textContent = 'Digite o ticket de um caso já lançado pra vincular o envio.';
+    return;
+  }
+
+  var casoResultado = null;
+  try { casoResultado = await apiGet('/api/casos/' + encodeURIComponent(ticket)); } catch (e) { casoResultado = null; }
+  if (document.getElementById('inp-ticket').value.trim() !== ticket) return;
+
+  if (casoResultado && casoResultado.encontrado) {
+    campos.style.display = '';
+    vazio.style.display = 'none';
+    var registroSedex = null;
+    try { registroSedex = await apiGet('/api/sedex/' + encodeURIComponent(ticket)); } catch (e) { registroSedex = null; }
+    if (registroSedex) {
+      document.getElementById('inp-sedex-data').value = registroSedex.data;
+      document.getElementById('inp-sedex-rastreio').value = registroSedex.rastreio;
+      trocarTipoEnvio(registroSedex.tipo || 'Físico');
+    } else {
+      document.getElementById('inp-sedex-data').value = '';
+      document.getElementById('inp-sedex-rastreio').value = '';
+      document.querySelectorAll('#grupo-tipo-envio .stamp').forEach(function(b){ b.classList.remove('sel'); });
+      tipoEnvioAtual = null;
+      document.getElementById('campo-sedex-rastreio').style.display = '';
+    }
+  } else {
+    campos.style.display = 'none';
+    vazio.style.display = '';
+    vazio.textContent = 'Ticket não encontrado na memória — confira o número.';
+  }
+}
+
+async function registrarSedex(){
+  var fb = document.getElementById('fb-sedex');
+  var ticket = document.getElementById('inp-ticket').value.trim();
+  var data = document.getElementById('inp-sedex-data').value;
+  var rastreio = document.getElementById('inp-sedex-rastreio').value.trim();
+  if (!tipoEnvioAtual){ fb.textContent = 'Selecione o tipo de envio.'; fb.style.color = 'var(--rose)'; return; }
+  if (!data){ fb.textContent = 'Informe a data de postagem.'; fb.style.color = 'var(--rose)'; return; }
+  if (tipoEnvioAtual === 'Físico' && !rastreio){ fb.textContent = 'Informe o código de rastreio.'; fb.style.color = 'var(--rose)'; return; }
+  var valorRastreio = tipoEnvioAtual === 'Digital' ? 'Registro digital' : rastreio;
+  try {
+    await apiPost('/api/sedex', { ticket: ticket, data: data, rastreio: valorRastreio, tipo: tipoEnvioAtual });
+    fb.textContent = '✓ Envio registrado para o ticket ' + ticket + '.';
+    fb.style.color = 'var(--green)';
+  } catch (e) {
+    fb.textContent = 'Não consegui registrar — confira se o backend está acessível.';
+    fb.style.color = 'var(--rose)';
+  }
+}
+
+function popularFiltroAnalista(){
+  var sel = document.getElementById('hist-filtro-analista');
+  var atuais = Array.from(sel.options).map(function(o){ return o.value; });
+  var nomes = Array.from(new Set(todosCasosHoje.map(function(c){ return c.analista; })));
+  nomes.forEach(function(n){
+    if (atuais.indexOf(n) === -1) {
+      var opt = document.createElement('option');
+      opt.value = n; opt.textContent = n;
+      sel.appendChild(opt);
+    }
+  });
+}
+
+function renderHistorico(){
+  var periodo = document.getElementById('hist-periodo').value;
+  var inicioPeriodo = inicioDoPeriodo(periodo);
+
+  document.getElementById('hist-entrada').textContent = todosCasosHoje.filter(function(c){ return c.etapa === 'Viabilidade' && c.momento >= inicioPeriodo; }).length;
+  document.getElementById('hist-saida').textContent = sedexHoje.filter(function(s){ return s.momento >= inicioPeriodo; }).length;
+  document.getElementById('hist-saldo').textContent = todosCasosHoje.filter(function(c){ return c.etapa === 'Viabilidade' && c.momento >= inicioPeriodo; }).length - sedexHoje.filter(function(s){ return s.momento >= inicioPeriodo; }).length;
+
+  var fEtapa = document.getElementById('hist-filtro-etapa').value;
+  var fAnalista = document.getElementById('hist-filtro-analista').value;
+
+  var linhas = todosCasosHoje.filter(function(c){
+    return c.momento >= inicioPeriodo && (!fEtapa || c.etapa === fEtapa) && (!fAnalista || c.analista === fAnalista);
+  }).sort(function(a,b){ return b.momento - a.momento; });
+
+  var tbody = document.getElementById('hist-tbody');
+  var vazio = document.getElementById('hist-vazio');
+  tbody.innerHTML = '';
+  if (linhas.length === 0) {
+    vazio.style.display = '';
+    return;
+  }
+  vazio.style.display = 'none';
+  linhas.forEach(function(c){
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td>'+c.analista+'</td><td>'+c.ticket+'</td><td>'+c.etapa+'</td><td>'+c.situacao.join(', ')+'</td><td>'+c.horario+'</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function exportarHistorico(){
+  var periodo = document.getElementById('hist-periodo').value;
+  var inicioPeriodo = inicioDoPeriodo(periodo);
+  var fEtapa = document.getElementById('hist-filtro-etapa').value;
+  var fAnalista = document.getElementById('hist-filtro-analista').value;
+  var linhas = todosCasosHoje.filter(function(c){
+    return c.momento >= inicioPeriodo && (!fEtapa || c.etapa === fEtapa) && (!fAnalista || c.analista === fAnalista);
+  }).sort(function(a,b){ return b.momento - a.momento; });
+
+  var dados = linhas.map(function(c){
+    return { 'Analista': c.analista, 'Ticket': c.ticket, 'Etapa': c.etapa, 'Situação': c.situacao.join(', '), 'Horário de lançamento': c.horario };
+  });
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dados), 'Histórico');
+  XLSX.writeFile(wb, 'Historico_' + hojeISO() + '.xlsx');
+}
+
+function hojeISO(){
+  var d = new Date();
+  var pad = function(n){ return String(n).padStart(2,'0'); };
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+}
+
+function ehHoje(momento){
+  return momento instanceof Date && momento.toDateString() === new Date().toDateString();
+}
+
+function inicioDoPeriodo(periodo){
+  if (periodo === 'todos') return new Date(0);
+  var d = new Date();
+  d.setHours(0,0,0,0);
+  if (periodo === 'semana') {
+    var diaSemana = d.getDay();
+    var offset = diaSemana === 0 ? 6 : diaSemana - 1;
+    d.setDate(d.getDate() - offset);
+  } else if (periodo === 'mes') {
+    d.setDate(1);
+  }
+  return d;
+}
+
+var metasEsteira = {};
+
+function diasNoMes(){
+  var d = new Date();
+  return new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
+}
+
+async function renderMes(){
+  try {
+    var metasApi = await apiGet('/api/metas');
+    metasEsteira = {};
+    metasApi.forEach(function(m){ metasEsteira[m.etapa] = m.meta; });
+  } catch (e) { console.error('Falha ao carregar metas', e); }
+
+  var inicioMes = inicioDoPeriodo('mes');
+  var casosDoMes = todosCasosHoje.filter(function(c){ return c.momento >= inicioMes; });
+  var total = casosDoMes.length;
+  var diasComRegistro = new Set(casosDoMes.map(function(c){ return c.momento.toDateString(); })).size;
+  var hoje = new Date();
+  var totalDiasMes = diasNoMes();
+  var diasRestantes = totalDiasMes - hoje.getDate();
+
+  document.getElementById('mes-total').textContent = total;
+  document.getElementById('mes-dias-registro').textContent = diasComRegistro + (diasComRegistro === 1 ? ' dia com registros' : ' dias com registros');
+  document.getElementById('mes-media').textContent = diasComRegistro > 0 ? (total / diasComRegistro).toFixed(1) : '0';
+  document.getElementById('mes-dias-restantes').textContent = diasRestantes;
+  document.getElementById('mes-dias-total').textContent = 'de ' + totalDiasMes + ' dias no mês';
+
+  var cont = document.getElementById('mes-esteiras');
+  cont.innerHTML = '';
+  ETAPA_ORDEM.forEach(function(etapa){
+    var casosEtapa = casosDoMes.filter(function(c){ return c.etapa === etapa; });
+    var realizado = casosEtapa.length;
+    var analistas = Array.from(new Set(casosEtapa.map(function(c){ return c.analista; })));
+    var media = diasComRegistro > 0 ? (realizado / diasComRegistro).toFixed(1) : '0';
+    var meta = metasEsteira[etapa];
+
+    var card = document.createElement('div');
+    card.className = 'esteira-card';
+    var barraHtml = meta
+      ? '<div class="esteira-bar-wrap"><div class="esteira-bar-fill" style="width:'+Math.min(100, Math.round(realizado/meta*100))+'%;"></div></div>'
+      : '';
+    var footTexto = meta
+      ? ('Meta: '+meta+' · '+realizado+' de '+meta+' ('+Math.round(realizado/meta*100)+'%) · '+realizado+' casos no mês · média '+media+'/dia · <a onclick="configurarMeta(\''+etapa+'\')">Ajustar meta</a>')
+      : ('Sem meta configurada · '+realizado+' casos no mês · média '+media+'/dia · <a onclick="configurarMeta(\''+etapa+'\')">Configurar meta</a>');
+
+    card.innerHTML =
+      '<div class="esteira-head">'+
+        '<div><div class="esteira-nome">'+etapa.toUpperCase()+'</div><div class="esteira-sub">'+analistas.length+' analista'+(analistas.length === 1 ? '' : 's')+' · média '+media+'/dia</div></div>'+
+        '<div class="esteira-stats"><div><div class="esteira-stat-label">Realizado</div><div class="esteira-stat-val">'+realizado+'</div></div>'+
+        '<div><div class="esteira-stat-label">Meta</div><div class="esteira-stat-val">'+(meta || '—')+'</div></div></div>'+
+      '</div>'+
+      barraHtml+
+      '<div class="esteira-foot">'+footTexto+'</div>';
+    cont.appendChild(card);
+  });
+
+  renderSemanas();
+}
+
+var MESES_ABR = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+
+function formatarDataCurta(d){
+  return String(d.getDate()).padStart(2,'0') + ' de ' + MESES_ABR[d.getMonth()] + '.';
+}
+
+function renderSemanas(){
+  var hoje = new Date();
+  var ano = hoje.getFullYear(), mes = hoje.getMonth();
+  var totalDias = diasNoMes();
+  var cont = document.getElementById('mes-semanas');
+  cont.innerHTML = '';
+  var semanaNum = 1;
+
+  for (var inicio = 1; inicio <= totalDias; inicio += 7) {
+    var fim = Math.min(inicio + 6, totalDias);
+    var dataInicio = new Date(ano, mes, inicio, 0, 0, 0);
+    var dataFim = new Date(ano, mes, fim, 23, 59, 59);
+
+    var casosSemana = todosCasosHoje.filter(function(c){ return c.momento >= dataInicio && c.momento <= dataFim; });
+    var sedexSemana = sedexHoje.filter(function(s){ return s.momento >= dataInicio && s.momento <= dataFim; });
+    var total = casosSemana.length + sedexSemana.length;
+    var diasComReg = new Set(casosSemana.concat(sedexSemana).map(function(c){ return c.momento.toDateString(); })).size;
+    var media = diasComReg > 0 ? (total / diasComReg).toFixed(1) : '0.0';
+
+    var pills = ETAPA_ORDEM.map(function(etapa){
+      var n = casosSemana.filter(function(c){ return c.etapa === etapa; }).length;
+      return '<span class="badge-sit">'+etapa+': '+n+'</span>';
+    }).join('') + '<span class="badge-sit">Sedex: '+sedexSemana.length+'</span>';
+
+    var card = document.createElement('div');
+    card.className = 'card';
+    card.style.marginBottom = '14px';
+    card.innerHTML =
+      '<div class="card-body">'+
+        '<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:12px;">'+
+          '<div class="mono" style="font-size:15px;font-weight:700;">SEMANA '+semanaNum+' · '+formatarDataCurta(dataInicio)+' a '+formatarDataCurta(new Date(ano, mes, fim))+'</div>'+
+          '<div style="font-size:12px;color:var(--muted);">Total: <b style="color:var(--ink);">'+total+'</b> · Dias: '+diasComReg+' · Média: '+media+'/dia</div>'+
+        '</div>'+
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;">'+pills+'</div>'+
+      '</div>';
+    cont.appendChild(card);
+    semanaNum++;
+  }
+}
+
+async function configurarMeta(etapa){
+  var atual = metasEsteira[etapa] || '';
+  var valor = prompt('Meta mensal de casos para ' + etapa + ':', atual);
+  if (valor === null) return;
+  var n = parseInt(valor, 10);
+  if (!isNaN(n) && n > 0) {
+    try {
+      await apiPost('/api/metas', { etapa: etapa, meta: n });
+      await renderMes();
+    } catch (e) { alert('Não consegui salvar a meta — confira se o backend está acessível.'); }
+  }
+}
+
+var analistasEquipe = [];
+
+function nomesEquipe(){
+  return analistasEquipe.map(function(a){ return a.nome; });
+}
+
+async function carregarEquipe(){
+  try {
+    analistasEquipe = await apiGet('/api/equipe');
+  } catch (e) {
+    analistasEquipe = [];
+    console.error('Falha ao carregar equipe da API', e);
+  }
+  renderSelAnalista();
+}
+
+function renderSelAnalista(){
+  var nomes = nomesEquipe();
+  var sel = document.getElementById('sel-analista');
+  var atual = sel.value;
+  sel.innerHTML = '<option value="">— selecione seu nome —</option>' + nomes.map(function(n){ return '<option>'+n+'</option>'; }).join('');
+  if (nomes.indexOf(atual) !== -1) sel.value = atual;
+
+  var selPonto = document.getElementById('sel-ponto-nome');
+  var atualPonto = selPonto.value;
+  selPonto.innerHTML = '<option value="">— selecione seu nome —</option>' + nomes.map(function(n){ return '<option>'+n+'</option>'; }).join('');
+  if (nomes.indexOf(atualPonto) !== -1) selPonto.value = atualPonto;
+}
+
+var nomeEmEdicao = null;
+
+function renderListaEquipe(){
+  var cont = document.getElementById('lista-analistas-gestao');
+  cont.innerHTML = '';
+  analistasEquipe.forEach(function(a){
+    var row = document.createElement('div');
+    row.className = 'analista-row';
+    row.style.cursor = 'pointer';
+    row.innerHTML = '<span style="flex:1;"><b></b> <span class="mono" style="font-size:11px;color:var(--muted);"></span></span><button class="row-del">Remover</button>';
+    row.querySelector('b').textContent = a.nome;
+    row.querySelector('.mono').textContent = a.fila ? ('· ' + a.fila) : '· sem fila definida';
+    row.querySelector('span').addEventListener('click', function(){ editarAnalista(a.nome, a.fila); });
+    row.querySelector('.row-del').addEventListener('click', async function(ev){
+      ev.stopPropagation();
+      try {
+        await apiDelete('/api/equipe/' + encodeURIComponent(a.nome));
+        if (nomeEmEdicao === a.nome) cancelarEdicaoAnalista();
+        await carregarEquipe();
+        renderListaEquipe();
+      } catch (e) { alert('Não consegui remover — confira se o backend está acessível.'); }
+    });
+    cont.appendChild(row);
+  });
+}
+
+function editarAnalista(nome, fila){
+  nomeEmEdicao = nome;
+  document.getElementById('novo-analista').value = nome;
+  document.getElementById('nova-fila-analista').value = fila || '';
+  document.getElementById('btn-salvar-analista').textContent = 'Salvar';
+  document.getElementById('editando-analista-aviso').style.display = '';
+  document.getElementById('editando-analista-nome').textContent = nome;
+}
+
+function cancelarEdicaoAnalista(){
+  nomeEmEdicao = null;
+  document.getElementById('novo-analista').value = '';
+  document.getElementById('nova-fila-analista').value = '';
+  document.getElementById('btn-salvar-analista').textContent = '+ Adicionar';
+  document.getElementById('editando-analista-aviso').style.display = 'none';
+}
+
+async function addAnalista(){
+  var input = document.getElementById('novo-analista');
+  var selFila = document.getElementById('nova-fila-analista');
+  var nome = input.value.trim();
+  if (!nome) return;
+  if (!nomeEmEdicao && nomesEquipe().indexOf(nome) !== -1) {
+    editarAnalista(nome, analistasEquipe.find(function(a){ return a.nome === nome; }).fila);
+    return;
+  }
+  try {
+    await apiPost('/api/equipe', { nome: nome, fila: selFila.value || '' });
+    await carregarEquipe();
+    renderListaEquipe();
+    cancelarEdicaoAnalista();
+  } catch (e) { alert('Não consegui salvar — confira se o backend está acessível.'); }
+}
+
+function importarEquipe(event){
+  var arquivo = event.target.files[0];
+  if (!arquivo) return;
+  var reader = new FileReader();
+  reader.onload = async function(e){
+    var wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+    var planilha = wb.Sheets[wb.SheetNames[0]];
+    var linhas = XLSX.utils.sheet_to_json(planilha, { defval: '' });
+    var linhasFormatadas = linhas.map(function(linha){
+      var chaves = Object.keys(linha);
+      var chaveNome = chaves.find(function(k){ return k.toLowerCase().trim() === 'nome'; }) || chaves[0];
+      var chaveFila = chaves.find(function(k){ return k.toLowerCase().trim() === 'fila' || k.toLowerCase().trim() === 'etapa'; }) || chaves[1];
+      return { nome: String(linha[chaveNome] || '').trim(), fila: chaveFila ? String(linha[chaveFila] || '').trim() : '' };
+    }).filter(function(l){ return l.nome; });
+
+    try {
+      var resultado = await apiPost('/api/equipe/importar', { linhas: linhasFormatadas });
+      await carregarEquipe();
+      renderListaEquipe();
+      alert('Importação concluída: ' + resultado.adicionados + ' adicionados, ' + resultado.atualizados + ' atualizados.');
+    } catch (err) {
+      alert('Não consegui importar — confira se o backend está acessível.');
+    }
+    event.target.value = '';
+  };
+  reader.readAsArrayBuffer(arquivo);
+}
+
+function exportarEquipe(){
+  var dados = analistasEquipe.map(function(a){ return { 'Nome': a.nome, 'Fila': a.fila || '' }; });
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dados), 'Equipe');
+  XLSX.writeFile(wb, 'Equipe_' + hojeISO() + '.xlsx');
+}
+
+function parseDataFlexivel(v){
+  if (v instanceof Date && !isNaN(v)) return v;
+  if (typeof v === 'number') return new Date(Math.round((v - 25569) * 86400 * 1000));
+  if (typeof v === 'string') {
+    var texto = v.trim();
+    // Formato brasileiro: DD/MM/AAAA ou DD-MM-AAAA
+    var br = texto.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+    if (br) {
+      return new Date(Date.UTC(parseInt(br[3], 10), parseInt(br[2], 10) - 1, parseInt(br[1], 10)));
+    }
+    // Formato ISO: AAAA-MM-DD
+    var iso = texto.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (iso) {
+      return new Date(Date.UTC(parseInt(iso[1], 10), parseInt(iso[2], 10) - 1, parseInt(iso[3], 10)));
+    }
+  }
+  var d = new Date(v);
+  if (!isNaN(d)) return d;
+  return new Date();
+}
+
+function formatarDataHora(d){
+  var pad = function(n){ return String(n).padStart(2,'0'); };
+  return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes());
+}
+
+var ticketEmEdicao = null;
+
+async function buscarCasoEditar(){
+  var ticket = document.getElementById('inp-editar-ticket').value.trim();
+  var naoEncontrado = document.getElementById('editar-nao-encontrado');
+  var campos = document.getElementById('editar-campos');
+  var fb = document.getElementById('fb-editar');
+  fb.textContent = '';
+
+  var resultado = null;
+  if (ticket) { try { resultado = await apiGet('/api/casos/' + encodeURIComponent(ticket)); } catch (e) { resultado = null; } }
+
+  if (!ticket || !resultado || !resultado.encontrado) {
+    naoEncontrado.style.display = '';
+    campos.style.display = 'none';
+    ticketEmEdicao = null;
+    return;
+  }
+  naoEncontrado.style.display = 'none';
+  campos.style.display = '';
+  ticketEmEdicao = ticket;
+
+  var c = resultado.caso;
+  document.getElementById('edit-operacao').value = c.operacao || '';
+  document.getElementById('edit-data-entrada').value = c.data_entrada || '';
+  document.getElementById('edit-tipo-bem').value = c.tipo_bem || '';
+
+  var lancamentoConformidade = (resultado.historico || []).slice().reverse().find(function(l){ return l.etapa === 'Conformidade'; });
+  var campoVendedor = document.getElementById('editar-campo-vendedor');
+  if (lancamentoConformidade) {
+    campoVendedor.style.display = '';
+    document.getElementById('edit-tipo-vendedor').value = lancamentoConformidade.tipo_vendedor || '';
+    document.getElementById('edit-qtd-vendedores').value = lancamentoConformidade.qtd_vendedores || '';
+  } else {
+    campoVendedor.style.display = 'none';
+  }
+}
+
+async function salvarEdicaoCaso(){
+  if (!ticketEmEdicao) return;
+  var fb = document.getElementById('fb-editar');
+  try {
+    await apiPut('/api/casos/' + encodeURIComponent(ticketEmEdicao), {
+      operacao: document.getElementById('edit-operacao').value,
+      dataEntrada: document.getElementById('edit-data-entrada').value,
+      tipoBem: document.getElementById('edit-tipo-bem').value,
+      nome: null
+    });
+    fb.textContent = '✓ Caso ' + ticketEmEdicao + ' atualizado.';
+    fb.style.color = 'var(--green)';
+    await sincronizarCasosMemoria();
+    await sincronizarLancamentos();
+    renderHistorico();
+  } catch (e) {
+    fb.textContent = 'Não consegui salvar — confira se o backend está acessível.';
+    fb.style.color = 'var(--rose)';
+  }
+}
+
+async function excluirCasoEditado(){
+  if (!ticketEmEdicao) return;
+  if (!confirm('Excluir de vez o caso ' + ticketEmEdicao + '? Isso apaga o registro da memória, todos os lançamentos dele nas etapas e o SEDEX vinculado. Não tem como desfazer.')) return;
+  var fb = document.getElementById('fb-editar');
+  try {
+    await apiDelete('/api/casos/' + encodeURIComponent(ticketEmEdicao));
+    fb.textContent = '✓ Caso ' + ticketEmEdicao + ' excluído.';
+    fb.style.color = 'var(--green)';
+    document.getElementById('editar-campos').style.display = 'none';
+    document.getElementById('inp-editar-ticket').value = '';
+    ticketEmEdicao = null;
+    await sincronizarCasosMemoria();
+    await sincronizarLancamentos();
+    await sincronizarSedex();
+    renderHistorico();
+  } catch (e) {
+    fb.textContent = 'Não consegui excluir — confira se o backend está acessível.';
+    fb.style.color = 'var(--rose)';
+  }
+}
+
+function importarLegado(event){
+  var arquivo = event.target.files[0];
+  if (!arquivo) return;
+  var reader = new FileReader();
+  reader.onload = async function(e){
+    var wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array', cellDates: true });
+    var planilha = wb.Sheets[wb.SheetNames[0]];
+    var linhas = XLSX.utils.sheet_to_json(planilha, { defval: '' });
+    var linhasFormatadas = [];
+    linhas.forEach(function(linha){
+      var chaves = Object.keys(linha);
+      var chaveTicket = chaves.find(function(k){ return k.toLowerCase().trim() === 'ticket'; }) || chaves[0];
+      var chaveData = chaves.find(function(k){ return ['data de criação','data de criacao','data de entrada','data'].indexOf(k.toLowerCase().trim()) !== -1; }) || chaves[1];
+      var ticket = String(linha[chaveTicket] || '').trim();
+      if (!ticket) return;
+      var momento = parseDataFlexivel(linha[chaveData]);
+      linhasFormatadas.push({ ticket: ticket, dataEntrada: momento.toISOString().slice(0,10) });
+    });
+
+    try {
+      var resultado = await apiPost('/api/casos/importar-legado', { linhas: linhasFormatadas });
+      document.getElementById('legado-resultado').textContent = '✓ ' + resultado.importados + ' casos importados' + (resultado.ignorados > 0 ? ' · ' + resultado.ignorados + ' linhas ignoradas (sem ticket ou já existentes)' : '') + '.';
+      document.getElementById('legado-resultado').style.color = 'var(--green)';
+      await sincronizarCasosMemoria();
+      await sincronizarLancamentos();
+      renderHistorico();
+    } catch (err) {
+      document.getElementById('legado-resultado').textContent = 'Não consegui importar — confira se o backend está acessível.';
+      document.getElementById('legado-resultado').style.color = 'var(--rose)';
+    }
+    event.target.value = '';
+  };
+  reader.readAsArrayBuffer(arquivo);
+}
+
+carregarEquipe();
+
+async function zerarLegado(){
+  if (!confirm('Isso apaga só os casos importados da base legado (marcados como "Base legado"). Casos lançados de verdade pela equipe, ponto e provisionamento continuam intactos. Não tem como desfazer. Confirma?')) return;
+  try {
+    var resultado = await apiPost('/api/admin/zerar-legado', {});
+    alert('✓ Legado zerado: ' + resultado.casosRemovidos + ' casos removidos.');
+    await renderGestaoAtual();
+  } catch (e) {
+    alert('Não consegui zerar — confira se o backend está acessível.');
+  }
+}
+
+async function zerarDadosTeste(){
+  if (!confirm('Isso apaga TODOS os casos, lançamentos, SEDEX, ponto, solicitações e provisionamentos registrados até agora — de todo mundo. A lista de Equipe e as Metas configuradas continuam. Não tem como desfazer. Confirma?')) return;
+  try {
+    var resultado = await apiPost('/api/admin/zerar-testes', {});
+    alert('✓ Dados de teste zerados: ' + resultado.tabelasZeradas.join(', '));
+    await renderGestaoAtual();
+  } catch (e) {
+    alert('Não consegui zerar — confira se o backend está acessível.');
+  }
+}
+
+async function zerarLegado(){
+  if (!confirm('Isso remove só os casos importados da base legado (que não tiveram nenhum progresso real ainda). Ponto, provisionamento e qualquer caso com lançamento de verdade continuam intactos. Confirma?')) return;
+  try {
+    var resultado = await apiPost('/api/admin/zerar-legado', {});
+    alert('✓ ' + resultado.casosRemovidos + ' casos do legado removidos.');
+    await sincronizarCasosMemoria();
+    await sincronizarLancamentos();
+    await renderGestaoAtual();
+  } catch (e) {
+    alert('Não consegui zerar o legado — confira se o backend está acessível.');
+  }
+}
+
+async function verificarSenhaGestao(){
+  var senha = document.getElementById('inp-senha-gestao').value;
+  var erro = document.getElementById('senha-gestao-erro');
+  if (senha === 'caixaimovel') {
+    document.getElementById('gestao-lock').style.display = 'none';
+    document.getElementById('gestao-content').style.display = '';
+    await carregarEquipe();
+    renderListaEquipe();
+    await renderGestaoAtual();
+  } else {
+    erro.textContent = 'Senha incorreta.';
+  }
+}
+
+var gestaoSubAtual = 'equipe';
+
+async function trocarGestaoSub(sub, btn){
+  ['equipe','mes','historico','tme','fila','rentabilidade','programacao'].forEach(function(s){
+    document.getElementById('gestao-sub-' + s).style.display = (s === sub) ? '' : 'none';
+  });
+  document.querySelectorAll('#tabs-gestao .tab').forEach(function(b){ b.classList.remove('on'); });
+  if (btn) btn.classList.add('on');
+  gestaoSubAtual = sub;
+  await renderGestaoAtual();
+}
+
+async function renderGestaoAtual(){
+  if (gestaoSubAtual === 'equipe') { await carregarEquipe(); renderListaEquipe(); }
+  if (gestaoSubAtual === 'mes') { await sincronizarLancamentos(); await sincronizarSedex(); await renderMes(); }
+  if (gestaoSubAtual === 'historico') { await sincronizarLancamentos(); await sincronizarSedex(); popularFiltroAnalista(); renderHistorico(); }
+  if (gestaoSubAtual === 'tme') { await sincronizarLancamentos(); renderTME(); }
+  if (gestaoSubAtual === 'fila') { await sincronizarLancamentos(); await sincronizarSedex(); renderControleFila(); }
+  if (gestaoSubAtual === 'rentabilidade') { await sincronizarLancamentos(); await renderRentabilidade(); }
+  if (gestaoSubAtual === 'programacao') { await renderProgramacaoHE(); }
+}
+
+function renderTME(){
+  var porTicket = {};
+  todosCasosHoje.forEach(function(c){
+    if (!porTicket[c.ticket]) porTicket[c.ticket] = [];
+    porTicket[c.ticket].push(c);
+  });
+
+  var somaPorEtapa = {}, contPorEtapa = {};
+  ETAPA_ORDEM.forEach(function(e){ somaPorEtapa[e] = 0; contPorEtapa[e] = 0; });
+
+  Object.keys(porTicket).forEach(function(ticket){
+    var passos = porTicket[ticket].slice().sort(function(a,b){ return a.momento - b.momento; });
+    for (var i = 0; i < passos.length - 1; i++) {
+      var etapaOrigem = passos[i].etapa;
+      var minutos = (passos[i+1].momento - passos[i].momento) / 60000;
+      if (somaPorEtapa[etapaOrigem] !== undefined) {
+        somaPorEtapa[etapaOrigem] += minutos;
+        contPorEtapa[etapaOrigem]++;
+      }
+    }
+  });
+
+  var cont = document.getElementById('tme-cards');
+  cont.innerHTML = '';
+  ETAPA_ORDEM.forEach(function(etapa){
+    var n = contPorEtapa[etapa];
+    var media = n > 0 ? Math.round(somaPorEtapa[etapa] / n) : null;
+    var texto = media === null ? '—' : (media >= 60 ? Math.floor(media/60)+'h'+String(media%60).padStart(2,'0')+'min' : media+'min');
+    var card = document.createElement('div');
+    card.className = 'stat-card';
+    card.innerHTML = '<div class="stat-label">'+etapa.toUpperCase()+'</div><div class="stat-val">'+texto+'</div><div style="font-size:11px;color:var(--muted);margin-top:4px;">'+n+' transição'+(n===1?'':'ões')+' medida'+(n===1?'':'s')+'</div>';
+    cont.appendChild(card);
+  });
+}
+
+function renderControleFila(){
+  var entrada = todosCasosHoje.filter(function(c){ return c.etapa === 'Viabilidade' && ehHoje(c.momento); }).length;
+  var saida = sedexHoje.filter(function(s){ return ehHoje(s.momento); }).length;
+  document.getElementById('fila-entrada').textContent = entrada;
+  document.getElementById('fila-saida').textContent = saida;
+  document.getElementById('fila-saldo').textContent = entrada - saida;
+
+  var inicioMes = inicioDoPeriodo('mes');
+  var novos = todosCasosHoje.filter(function(c){ return c.etapa === 'Viabilidade' && c.momento >= inicioMes; });
+  var porDia = {};
+  novos.forEach(function(c){
+    var chave = c.horario.split(' ')[0];
+    porDia[chave] = (porDia[chave] || 0) + 1;
+  });
+  var dias = Object.keys(porDia).sort(function(a,b){
+    var da = a.split('/').reverse().join('-'), db = b.split('/').reverse().join('-');
+    return da.localeCompare(db);
+  });
+  var tbody = document.getElementById('fila-por-dia-tbody');
+  tbody.innerHTML = '';
+  if (dias.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--muted);font-style:italic;">Nenhum caso novo registrado ainda.</td></tr>';
+  } else {
+    dias.forEach(function(d){
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td>'+d+'</td><td>'+porDia[d]+'</td>';
+      tbody.appendChild(tr);
+    });
+  }
+  document.getElementById('fila-total-mes').textContent = novos.length;
+}
+
+var decisaoRentabilidade = {};
+
+async function renderRentabilidade(){
+  try {
+    var decisoesApi = await apiGet('/api/rentabilidade');
+    decisaoRentabilidade = {};
+    decisoesApi.forEach(function(d){ decisaoRentabilidade[d.etapa] = d.decisao; });
+  } catch (e) { console.error('Falha ao carregar decisões de rentabilidade', e); }
+
+  var volumeNormal = parseInt(document.getElementById('rent-volume-normal').value, 10) || 15;
+  var capacidadeHora = 2;
+
+  var cont = document.getElementById('rent-esteiras');
+  cont.innerHTML = '';
+
+  ETAPA_ORDEM.forEach(function(etapa){
+    var volumeHoje = todosCasosHoje.filter(function(c){ return c.etapa === etapa && ehHoje(c.momento); }).length;
+    var excedente = Math.max(0, volumeHoje - volumeNormal);
+    var horasNecessarias = excedente > 0 ? Math.ceil(excedente / capacidadeHora) : 0;
+    var decisao = decisaoRentabilidade[etapa];
+
+    var card = document.createElement('div');
+    card.className = 'esteira-card';
+    var alerta = excedente > 0
+      ? '<span class="badge-sit" style="background:var(--amber-soft);color:var(--amber);">⚠ Volumetria alta</span>'
+      : '<span class="badge-sit" style="background:var(--green-soft);color:var(--green);">✓ Dentro do normal</span>';
+
+    card.innerHTML =
+      '<div class="esteira-head">'+
+        '<div><div class="esteira-nome">'+etapa.toUpperCase()+'</div><div class="esteira-sub">'+volumeHoje+' hoje · normal até '+volumeNormal+'</div></div>'+
+        '<div class="esteira-stats"><div><div class="esteira-stat-label">Excedente</div><div class="esteira-stat-val">'+excedente+'</div></div>'+
+        '<div><div class="esteira-stat-label">Horas HE</div><div class="esteira-stat-val">'+horasNecessarias+'</div></div></div>'+
+      '</div>'+
+      '<div class="esteira-foot" style="justify-content:space-between;flex-wrap:wrap;gap:10px;">'+
+        alerta+
+        '<div class="sit-group" data-multi="false" id="grupo-rent-'+etapa+'">'+
+          '<button class="stamp'+(decisao==='rentavel'?' sel apr':'')+'" data-kind="apr" onclick="marcarRentabilidade(\''+etapa+'\',\'rentavel\')">Rentável</button>'+
+          '<button class="stamp'+(decisao==='nao'?' sel recus':'')+'" data-kind="recus" onclick="marcarRentabilidade(\''+etapa+'\',\'nao\')">Não rentável</button>'+
+        '</div>'+
+      '</div>';
+    cont.appendChild(card);
+  });
+}
+
+async function marcarRentabilidade(etapa, valor){
+  var novoValor = (decisaoRentabilidade[etapa] === valor) ? '' : valor;
+  try {
+    await apiPost('/api/rentabilidade', { etapa: etapa, decisao: novoValor });
+    await renderRentabilidade();
+  } catch (e) { alert('Não consegui salvar — confira se o backend está acessível.'); }
+}
+
+var analistaAtualPonto = null;
+var inicioTurno = null;
+var DIAS_SEMANA = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+var sextaSimulada = false;
+
+function ehSexta(){
+  return sextaSimulada || new Date().getDay() === 5;
+}
+
+async function solicitarCorrecao(nome){
+  try {
+    await apiPost('/api/ponto/solicitar-correcao', { analista: nome });
+  } catch (e) { /* segue mesmo se der erro de rede, pra tentar mostrar mensagem atualizada */ }
+  registrarPonto();
+}
+
+async function registrarPonto(){
+  var nome = document.getElementById('sel-ponto-nome').value;
+  var fb = document.getElementById('fb-ponto');
+  if (!nome){ fb.textContent = 'Selecione seu nome.'; fb.style.color = 'var(--rose)'; return; }
+
+  var resposta;
+  try {
+    resposta = await apiPost('/api/ponto/entrada', { analista: nome });
+  } catch (e) {
+    if (e.status === 409) {
+      var saidaOriginal = (e.body && e.body.saida) ? e.body.saida.split(' ')[1] : '—';
+      var pendentes = [];
+      try { pendentes = await apiGet('/api/ponto/solicitacoes'); } catch (e2) { pendentes = []; }
+      var jaSolicitou = pendentes.some(function(s){ return s.analista === nome; });
+      fb.innerHTML = 'Seu dia já foi encerrado às ' + saidaOriginal + '.<br>' +
+        (jaSolicitou
+          ? '<span style="color:var(--muted);font-weight:400;">Pedido de correção já enviado — aguarde a Gestão.</span>'
+          : '<button onclick="solicitarCorrecao(\''+nome+'\')" style="margin-top:8px;background:none;border:1px solid var(--rose);color:var(--rose);font-size:11px;font-weight:700;padding:6px 14px;border-radius:5px;cursor:pointer;">Solicitar correção à Gestão</button>');
+      fb.style.color = 'var(--rose)';
+    } else {
+      fb.textContent = 'Não consegui registrar — confira se o backend está acessível.';
+      fb.style.color = 'var(--rose)';
+    }
+    return;
+  }
+
+  var selLancar = document.getElementById('sel-analista');
+  if (Array.from(selLancar.options).some(function(o){ return o.value === nome; })) selLancar.value = nome;
+  selLancar.setAttribute('disabled','disabled');
+
+  analistaAtualPonto = nome;
+  inicioTurno = new Date(resposta.ponto.momento);
+
+  if (!resposta.retomado && ehSexta()) {
+    document.getElementById('ponto-passo-nome').style.display = 'none';
+    document.getElementById('ponto-passo-provisao').style.display = '';
+    await montarFormularioProvisao(nome);
+  } else {
+    abrirApp();
+  }
+}
+
+function limiteDoDia(dia){
+  return dia === 'Sábado' ? 6 : 2;
+}
+
+function semanaAlvoISO(){
+  var d = new Date();
+  var diaSemana = d.getDay();
+  var diasAteProximaSegunda = diaSemana === 0 ? 1 : (8 - diaSemana);
+  var proximaSegunda = new Date(d.getFullYear(), d.getMonth(), d.getDate() + diasAteProximaSegunda);
+  var pad = function(n){ return String(n).padStart(2,'0'); };
+  return proximaSegunda.getFullYear() + '-' + pad(proximaSegunda.getMonth()+1) + '-' + pad(proximaSegunda.getDate());
+}
+
+async function montarFormularioProvisao(nome){
+  var semana = semanaAlvoISO();
+  var cont = document.getElementById('provisao-dias');
+  cont.innerHTML = '<div style="font-size:12px;color:var(--muted);">Verificando...</div>';
+  document.getElementById('ponto-passo-provisao').setAttribute('data-analista', nome);
+  document.getElementById('ponto-passo-provisao').setAttribute('data-semana', semana);
+
+  var existentes = [];
+  try { existentes = await apiGet('/api/provisionamento?analista=' + encodeURIComponent(nome) + '&semana=' + semana); } catch (e) { existentes = []; }
+
+  if (existentes.length > 0) {
+    cont.innerHTML = '<div style="grid-column:1/-1;font-size:13px;color:var(--green);background:var(--green-soft);border:1px solid var(--green);border-radius:5px;padding:10px 13px;">✓ Você já provisionou <b>'+existentes[0].total+'h</b> pra essa semana. Fale com a Gestão se precisar alterar.</div>';
+    document.getElementById('btn-salvar-provisao').style.display = 'none';
+  } else {
+    document.getElementById('btn-salvar-provisao').style.display = '';
+    cont.innerHTML = '';
+    DIAS_SEMANA.forEach(function(dia, i){
+      var limite = limiteDoDia(dia);
+      var field = document.createElement('div');
+      field.className = 'field';
+      field.innerHTML = '<label>'+dia+' (até '+limite+'h)</label><input type="number" min="0" max="'+limite+'" step="0.5" value="0" class="inp-provisao-dia" data-dia="'+dia+'" oninput="validarProvisaoDia(this)"><div class="fb" style="font-size:11px;margin-top:2px;min-height:14px;" id="alerta-provisao-'+i+'"></div>';
+      cont.appendChild(field);
+    });
+  }
+}
+
+function validarProvisaoDia(input){
+  var dia = input.getAttribute('data-dia');
+  var limite = limiteDoDia(dia);
+  var idx = DIAS_SEMANA.indexOf(dia);
+  var alerta = document.getElementById('alerta-provisao-' + idx);
+  var valor = parseFloat(input.value) || 0;
+  if (valor > limite) {
+    alerta.textContent = '⚠ Atenção: limite de ' + limite + 'h excedido';
+    alerta.style.color = 'var(--amber)';
+  } else {
+    alerta.textContent = '';
+  }
+}
+
+async function salvarProvisao(){
+  var nome = document.getElementById('ponto-passo-provisao').getAttribute('data-analista');
+  var semana = document.getElementById('ponto-passo-provisao').getAttribute('data-semana');
+  var dias = {};
+  var total = 0;
+  var estourou = false;
+  document.querySelectorAll('.inp-provisao-dia').forEach(function(inp){
+    var v = parseFloat(inp.value) || 0;
+    var dia = inp.getAttribute('data-dia');
+    if (v > limiteDoDia(dia)) estourou = true;
+    dias[dia] = v;
+    total += v;
+  });
+  if (estourou) {
+    document.getElementById('fb-provisao').textContent = '⚠ Ajuste os dias que passaram do limite antes de salvar.';
+    document.getElementById('fb-provisao').style.color = 'var(--rose)';
+    return;
+  }
+  try {
+    await apiPost('/api/provisionamento', { analista: nome, dias: dias, total: total, semanaReferencia: semana });
+    document.getElementById('fb-provisao').textContent = '✓ Provisionamento salvo (' + total + 'h na semana).';
+    document.getElementById('fb-provisao').style.color = 'var(--green)';
+    setTimeout(abrirApp, 900);
+  } catch (e) {
+    if (e.status === 409) {
+      document.getElementById('fb-provisao').textContent = 'Você já provisionou essa semana — fale com a Gestão se precisar alterar.';
+    } else {
+      document.getElementById('fb-provisao').textContent = 'Não consegui salvar — confira se o backend está acessível.';
+    }
+    document.getElementById('fb-provisao').style.color = 'var(--rose)';
+  }
+}
+
+async function abrirProvisaoManual(){
+  if (!analistaAtualPonto) { alert('Identifique-se primeiro pra provisionar.'); return; }
+  var semana = semanaAlvoISO();
+  document.getElementById('modal-provisao-manual').setAttribute('data-semana', semana);
+  var cont = document.getElementById('provisao-manual-dias');
+  cont.innerHTML = '<div style="font-size:12px;color:var(--muted);">Verificando...</div>';
+  document.getElementById('fb-provisao-manual').textContent = '';
+  document.getElementById('modal-provisao-manual').style.display = 'flex';
+
+  var existentes = [];
+  try { existentes = await apiGet('/api/provisionamento?analista=' + encodeURIComponent(analistaAtualPonto) + '&semana=' + semana); } catch (e) { existentes = []; }
+
+  if (existentes.length > 0) {
+    cont.innerHTML = '<div style="grid-column:1/-1;font-size:13px;color:var(--green);background:var(--green-soft);border:1px solid var(--green);border-radius:5px;padding:10px 13px;">✓ Você já provisionou <b>'+existentes[0].total+'h</b> pra essa semana. Fale com a Gestão se precisar alterar.</div>';
+    document.getElementById('btn-salvar-provisao-manual').style.display = 'none';
+  } else {
+    document.getElementById('btn-salvar-provisao-manual').style.display = '';
+    cont.innerHTML = '';
+    DIAS_SEMANA.forEach(function(dia, i){
+      var limite = limiteDoDia(dia);
+      var field = document.createElement('div');
+      field.className = 'field';
+      field.innerHTML = '<label>'+dia+' (até '+limite+'h)</label><input type="number" min="0" max="'+limite+'" step="0.5" value="0" class="inp-provisao-manual-dia" data-dia="'+dia+'" oninput="validarProvisaoManualDia(this)"><div class="fb" style="font-size:11px;margin-top:2px;min-height:14px;" id="alerta-provisao-manual-'+i+'"></div>';
+      cont.appendChild(field);
+    });
+  }
+}
+
+function validarProvisaoManualDia(input){
+  var dia = input.getAttribute('data-dia');
+  var limite = limiteDoDia(dia);
+  var idx = DIAS_SEMANA.indexOf(dia);
+  var alerta = document.getElementById('alerta-provisao-manual-' + idx);
+  var valor = parseFloat(input.value) || 0;
+  if (valor > limite) {
+    alerta.textContent = '⚠ Atenção: limite de ' + limite + 'h excedido';
+    alerta.style.color = 'var(--amber)';
+  } else {
+    alerta.textContent = '';
+  }
+}
+
+async function salvarProvisaoManual(){
+  var semana = document.getElementById('modal-provisao-manual').getAttribute('data-semana');
+  var dias = {};
+  var total = 0;
+  var estourou = false;
+  document.querySelectorAll('.inp-provisao-manual-dia').forEach(function(inp){
+    var v = parseFloat(inp.value) || 0;
+    var dia = inp.getAttribute('data-dia');
+    if (v > limiteDoDia(dia)) estourou = true;
+    dias[dia] = v;
+    total += v;
+  });
+  var fb = document.getElementById('fb-provisao-manual');
+  if (estourou) {
+    fb.textContent = '⚠ Ajuste os dias que passaram do limite antes de salvar.';
+    fb.style.color = 'var(--rose)';
+    return;
+  }
+  try {
+    await apiPost('/api/provisionamento', { analista: analistaAtualPonto, dias: dias, total: total, semanaReferencia: semana });
+    fb.textContent = '✓ Provisionamento salvo (' + total + 'h na semana).';
+    fb.style.color = 'var(--green)';
+    setTimeout(fecharProvisaoManual, 900);
+  } catch (e) {
+    if (e.status === 409) {
+      fb.textContent = 'Você já provisionou essa semana — fale com a Gestão se precisar alterar.';
+    } else {
+      fb.textContent = 'Não consegui salvar — confira se o backend está acessível.';
+    }
+    fb.style.color = 'var(--rose)';
+  }
+}
+
+function fecharProvisaoManual(){
+  document.getElementById('modal-provisao-manual').style.display = 'none';
+}
+
+function pularProvisao(){
+  abrirApp();
+}
+
+function acessarComoGestao(){
+  document.getElementById('tela-ponto').style.display = 'none';
+  document.getElementById('app-principal').style.display = '';
+  var btnGestao = Array.from(document.querySelectorAll('#tabs-principal .tab')).find(function(b){ return b.textContent.trim() === 'Gestão'; });
+  trocarTab('gestao', btnGestao);
+}
+
+function abrirApp(){
+  document.getElementById('tela-ponto').style.display = 'none';
+  document.getElementById('app-principal').style.display = '';
+  var btnPonto = Array.from(document.querySelectorAll('#tabs-principal .tab')).find(function(b){ return b.textContent.trim() === 'Meu Ponto'; });
+  trocarTab('ponto', btnPonto);
+}
+
+function inicioDaSemana(){
+  var d = new Date();
+  var diaSemana = d.getDay(); // 0=domingo
+  var offset = diaSemana === 0 ? 6 : diaSemana - 1; // volta até segunda
+  var seg = new Date(d.getFullYear(), d.getMonth(), d.getDate() - offset, 0, 0, 0);
+  return seg;
+}
+
+async function atualizarMeuControle(){
+  if (!analistaAtualPonto) return;
+
+  var abertos = [];
+  try { abertos = await apiGet('/api/ponto?analista=' + encodeURIComponent(analistaAtualPonto)); } catch (e) { abertos = []; }
+  var registroAberto = abertos.find(function(p){ return !p.saida; });
+  document.getElementById('meu-controle-entrada').textContent = registroAberto ? registroAberto.horario.split(' ')[1] : '—';
+  document.getElementById('meu-controle-saida').textContent = 'Em andamento';
+
+  var inicioSemana = inicioDaSemana();
+  var meusPontos = abertos.filter(function(p){ return new Date(p.momento) >= inicioSemana; })
+    .sort(function(a,b){ return new Date(a.momento) - new Date(b.momento); });
+
+  var tbody = document.getElementById('meu-ponto-semana-tbody');
+  tbody.innerHTML = '';
+  if (meusPontos.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);font-style:italic;">Nenhum ponto registrado nesta semana ainda.</td></tr>';
+    return;
+  }
+  meusPontos.forEach(function(p){
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td>'+p.horario.split(' ')[0]+'</td><td>'+p.horario.split(' ')[1]+'</td><td>'+(p.saida ? p.saida.split(' ')[1] : 'Em andamento')+'</td><td>'+(p.casos === null || p.casos === undefined ? '—' : p.casos)+'</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+async function finalizarDia(){
+  if (analistaAtualPonto) {
+    try { await apiPost('/api/ponto/finalizar', { analista: analistaAtualPonto }); }
+    catch (e) { /* segue mesmo se der erro, pra não travar a pessoa na tela */ }
+  }
+
+  document.getElementById('app-principal').style.display = 'none';
+  document.getElementById('tela-ponto').style.display = 'flex';
+  document.getElementById('ponto-passo-nome').style.display = '';
+  document.getElementById('ponto-passo-provisao').style.display = 'none';
+  document.getElementById('sel-ponto-nome').value = '';
+  document.getElementById('fb-ponto').textContent = '';
+  document.getElementById('sel-analista').value = '';
+  document.getElementById('sel-analista').removeAttribute('disabled');
+  analistaAtualPonto = null;
+  inicioTurno = null;
+  sextaSimulada = false;
+  var btnPonto = Array.from(document.querySelectorAll('#tabs-principal .tab')).find(function(b){ return b.textContent.trim() === 'Meu Ponto'; });
+  trocarTab('ponto', btnPonto);
+}
+
+async function renderProgramacaoHE(){
+  var pendentes = [];
+  try { pendentes = await apiGet('/api/ponto/solicitacoes'); } catch (e) { pendentes = []; }
+  var correcaoCont = document.getElementById('correcao-tbody');
+  correcaoCont.innerHTML = '';
+  if (pendentes.length === 0) {
+    correcaoCont.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);font-style:italic;">Nenhuma solicitação pendente.</td></tr>';
+  } else {
+    pendentes.forEach(function(s){
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td>'+s.analista+'</td><td>'+(s.saida_original || '—')+'</td><td>'+s.solicitado_em+'</td><td><button onclick="reabrirDia('+s.id+')" style="background:none;border:1px solid var(--accent);color:var(--accent);font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;">Reabrir dia</button></td>';
+      correcaoCont.appendChild(tr);
+    });
+  }
+
+  var pontos = [];
+  try { pontos = await apiGet('/api/ponto'); } catch (e) { pontos = []; }
+
+  var dataFiltro = document.getElementById('ponto-hist-data').value;
+  if (dataFiltro) {
+    var partesData = dataFiltro.split('-');
+    var diaAlvo = new Date(partesData[0], partesData[1]-1, partesData[2]).toDateString();
+    pontos = pontos.filter(function(p){ return new Date(p.momento).toDateString() === diaAlvo; });
+  }
+
+  var histCont = document.getElementById('ponto-historico-tbody');
+  histCont.innerHTML = '';
+  if (pontos.length === 0) {
+    histCont.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);font-style:italic;">'+(dataFiltro ? 'Nenhum ponto nesse dia.' : 'Nenhum ponto registrado ainda.')+'</td></tr>';
+  } else {
+    pontos.forEach(function(p){
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td>'+p.analista+'</td><td>'+p.horario+'</td><td>'+(p.saida || '—')+'</td><td>'+(p.casos === null ? '—' : p.casos)+'</td>';
+      histCont.appendChild(tr);
+    });
+  }
+
+  var provisionamentos = [];
+  try { provisionamentos = await apiGet('/api/provisionamento'); } catch (e) { provisionamentos = []; }
+  var provCont = document.getElementById('provisao-tbody');
+  provCont.innerHTML = '';
+  if (provisionamentos.length === 0) {
+    provCont.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);font-style:italic;">Nenhum provisionamento registrado ainda.</td></tr>';
+  } else {
+    provisionamentos.forEach(function(p){
+      var tr = document.createElement('tr');
+      var celulas = '<td>'+p.analista+'</td>';
+      DIAS_SEMANA.forEach(function(d){ celulas += '<td>'+(p.dias[d] || 0)+'h</td>'; });
+      celulas += '<td><b>'+p.total+'h</b></td>';
+      celulas += '<td><button onclick="liberarProvisao('+p.id+')" style="background:none;border:1px solid var(--muted);color:var(--muted);font-size:10px;font-weight:700;padding:4px 10px;border-radius:5px;cursor:pointer;white-space:nowrap;">Liberar</button></td>';
+      tr.innerHTML = celulas;
+      provCont.appendChild(tr);
+    });
+  }
+}
+
+async function liberarProvisao(id){
+  if (!confirm('Liberar esse provisionamento? A pessoa vai poder preencher de novo pra essa semana.')) return;
+  try {
+    await apiDelete('/api/provisionamento/' + id);
+    await renderProgramacaoHE();
+  } catch (e) { alert('Não consegui liberar — confira se o backend está acessível.'); }
+}
+
+async function reabrirDia(id){
+  try {
+    await apiPost('/api/ponto/reabrir/' + id, {});
+    await renderProgramacaoHE();
+  } catch (e) { alert('Não consegui reabrir — confira se o backend está acessível.'); }
+}
+</script>
+</div>
+</body>
+</html>
