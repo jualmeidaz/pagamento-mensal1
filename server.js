@@ -35,8 +35,25 @@ app.get('/api/dados', (req, res) => {
 });
 
 // POST - salvar todos os dados
+// Trava de seguranca: recusa gravacoes que reduziriam drasticamente
+// registros, pagamentos ou legado (ex: uma aba desatualizada tentando
+// salvar por cima com dados vazios/antigos).
 app.post('/api/dados', (req, res) => {
-  saveDB(req.body);
+  const atual = loadDB();
+  const novo = req.body || {};
+  const chaves = ['registros', 'pagamentos', 'legado'];
+  for (const k of chaves) {
+    const antigo = (atual[k] || []).length;
+    const novoLen = (novo[k] || []).length;
+    if (antigo >= 10 && novoLen < antigo * 0.5) {
+      console.error('BLOQUEADO: tentativa de salvar ' + k + ' caindo de ' + antigo + ' para ' + novoLen);
+      return res.status(409).json({
+        ok: false,
+        erro: 'Gravacao bloqueada: ' + k + ' cairia de ' + antigo + ' para ' + novoLen + ' registros. Recarregue a pagina e tente novamente.'
+      });
+    }
+  }
+  saveDB(novo);
   res.json({ ok: true });
 });
 
