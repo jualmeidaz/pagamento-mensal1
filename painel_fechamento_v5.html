@@ -1989,7 +1989,8 @@ function adicionarPagamento(){
     var sufixoCOB=(gr&&co)?(gr+'-'+co):nm.toUpperCase().replace(/\s+/g,'-');
     tk='COB-'+sufixoCOB;
   }
-  var pagExiste=tk&&pagamentos.some(function(p){return String(p.ticket)===String(tk);});
+  var etapaAtual=document.getElementById('pg-etapa').value;
+  var pagExiste=tk&&etapaAtual!=='Etapa de Obra'&&pagamentos.some(function(p){return String(p.ticket)===String(tk);});
   var checkReprog=document.getElementById('pg-reprogramacao-check');
   var isReprog=checkReprog&&checkReprog.checked;
   if(pagExiste&&!isReprog){
