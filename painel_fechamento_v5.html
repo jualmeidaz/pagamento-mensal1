@@ -1991,7 +1991,7 @@ function adicionarPagamento(){
     tk='COB-'+sufixoCOB;
   }
   var etapaAtual=document.getElementById('pg-etapa').value;
-  var pagExiste=tk&&etapaAtual!=='Etapa de Obra'&&pagamentos.some(function(p){return String(p.ticket)===String(tk);});
+  var pagExiste=tk&&etapaAtual!=='Etapa de Obra'&&pagamentos.some(function(p){return String(p.ticket)===String(tk)&&p.etapa===etapaAtual;});
   var checkReprog=document.getElementById('pg-reprogramacao-check');
   var isReprog=checkReprog&&checkReprog.checked;
   if(pagExiste&&!isReprog){
